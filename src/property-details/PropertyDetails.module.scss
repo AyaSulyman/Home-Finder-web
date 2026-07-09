@@ -1,0 +1,36 @@
+@import "./shared/tokens.scss";
+
+.page {
+  background: $bg;
+  color: $ink;
+  font-family: $sans;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1216px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.gallerySpacing {
+  margin-bottom: 40px;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 48px;
+  align-items: start;
+  padding-bottom: 64px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid $border;
+  margin: 26px 0;
+}
