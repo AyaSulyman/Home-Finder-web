@@ -2,7 +2,11 @@ import React from "react";
 import styles from "./Header.module.scss";
 import { HomeIcon } from "../shared/icons";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  active?: "home" | "browse" | "contact";
+}
+
+const Header: React.FC<HeaderProps> = ({ active = "browse" }) => {
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>
@@ -12,13 +16,36 @@ const Header: React.FC = () => {
         </div>
 
         <nav className={styles.nav}>
-          <a className={styles.navLink} href="#">
+          <a
+            className={
+              active === "home"
+                ? styles.navLinkActive
+                : styles.navLink
+            }
+            href="/"
+          >
             Home
           </a>
-          <a className={styles.navLinkActive} href="#">
+
+          <a
+            className={
+              active === "browse"
+                ? styles.navLinkActive
+                : styles.navLink
+            }
+            href="/"
+          >
             Browse Properties
           </a>
-          <a className={styles.navLink} href="#">
+
+          <a
+            className={
+              active === "contact"
+                ? styles.navLinkActive
+                : styles.navLink
+            }
+            href="#contact"
+          >
             Contact
           </a>
         </nav>
@@ -27,6 +54,7 @@ const Header: React.FC = () => {
           <button type="button" className={styles.btnGhost}>
             Log In
           </button>
+
           <button type="button" className={styles.btnDark}>
             Sign Up
           </button>

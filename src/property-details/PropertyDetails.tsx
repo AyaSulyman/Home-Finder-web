@@ -1,4 +1,5 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 import styles from "./PropertyDetails.module.scss";
 
 import Header from "./Header/Header";
@@ -60,12 +61,19 @@ const SIMILAR_LISTINGS: SimilarListing[] = [
 ];
 
 const PropertyDetails: React.FC = () => {
+  const { id } = useParams();
+
+  console.log("Property ID:", id);
+
   return (
     <div className={styles.page}>
-      <Header />
+      <Header active="browse" />
 
       <div className={styles.container}>
-        <Breadcrumb trail={["Home", "Browse Properties"]} current="Archer House" />
+        <Breadcrumb
+          trail={["Home", "Browse Properties"]}
+          current="Archer House"
+        />
 
         <div className={styles.gallerySpacing}>
           <Gallery extraPhotosCount={12} />
@@ -84,17 +92,21 @@ const PropertyDetails: React.FC = () => {
             />
 
             <hr className={styles.divider} />
+
             <AboutProperty
               description="A sun-filled four-bedroom home set on a quiet, tree-lined street in Lakeview. The open-plan kitchen and living area lead directly onto a private deck and landscaped garden — ideal for entertaining or quiet mornings with coffee. Recently renovated with new flooring, updated bathrooms, and energy-efficient windows throughout."
             />
 
             <hr className={styles.divider} />
+
             <Amenities items={AMENITIES} />
 
             <hr className={styles.divider} />
+
             <LocationMap />
 
             <hr className={styles.divider} />
+
             <ListedBy
               initials="DM"
               name="Dana Marlowe"
@@ -105,6 +117,7 @@ const PropertyDetails: React.FC = () => {
           {/* Right column */}
           <aside>
             <BookingCard agentName="Dana Marlowe" />
+
             <MortgageEstimate
               apr="6.4% APR"
               monthlyPayment="$3,420"

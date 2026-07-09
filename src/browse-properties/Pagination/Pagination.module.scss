@@ -1,0 +1,57 @@
+@use "../../property-details/shared/tokens.scss" as *;
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
+}
+
+.pageBtn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 6px;
+  border: 1px solid $border-strong;
+  border-radius: 3px;
+  background: #fff;
+  font-family: $sans;
+  font-size: 14px;
+  color: $ink;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $ink;
+  }
+}
+
+.pageBtnActive {
+  composes: pageBtn;
+  background: $dark;
+  border-color: $dark;
+  color: #fbf9f3;
+  font-weight: 600;
+
+  &:hover {
+    background: $dark-hover;
+  }
+}
+
+.arrowBtn {
+  composes: pageBtn;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.ellipsis {
+  min-width: 38px;
+  text-align: center;
+  color: $muted;
+  font-size: 14px;
+}

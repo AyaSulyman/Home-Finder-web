@@ -1,0 +1,128 @@
+@use "../../property-details/shared/tokens.scss" as *;
+
+.card {
+  position: relative;
+  background: $card;
+  border: 1px solid $border;
+  overflow: hidden;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 16px;
+  height: 16px;
+  border-bottom: 2px solid $accent;
+  border-right: 2px solid $accent;
+}
+
+.imageWrap {
+  position: relative;
+  height: 190px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: $dark;
+  color: #fbf9f3;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 5px 9px;
+  border-radius: 3px;
+}
+
+.badgeRent {
+  composes: badge;
+  background: $rent-badge;
+}
+
+.badgePending {
+  composes: badge;
+  background: #6b6f66;
+}
+
+.favoriteBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: $ink;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    background: #fff;
+  }
+}
+
+.body {
+  padding: 18px 20px 20px;
+}
+
+.price {
+  font-family: $serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: $ink;
+}
+
+.titleText {
+  font-size: 15px;
+  font-weight: 600;
+  color: $ink;
+  margin-top: 6px;
+}
+
+.address {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: $muted;
+  margin-top: 6px;
+}
+
+.pin {
+  color: #c0472f;
+  flex-shrink: 0;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid $border;
+  margin: 14px 0;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: $muted;
+}
+
+.statIcon {
+  color: $accent;
+}
