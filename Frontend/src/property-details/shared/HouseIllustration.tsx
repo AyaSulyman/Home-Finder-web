@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 
 interface HouseIllustrationProps {
   variant?: "hero" | "thumb" | "card";
@@ -12,9 +12,7 @@ const HouseIllustration: React.FC<HouseIllustrationProps> = ({
   darken = false,
   className,
 }) => {
-  const gradientId = `sky-${variant}-${darken ? "dark" : "light"}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}`;
+  const gradientId = `sky-${variant}-${darken ? "dark" : "light"}-${useId()}`;
 
   return (
     <svg
