@@ -1,0 +1,71 @@
+@import "../shared/tokens.scss";
+
+.card {
+  position: relative;
+  background: $card;
+  border: 1px solid $border;
+  padding: 26px;
+}
+
+.cardCornerTL,
+.cardCornerBR {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-style: solid;
+  border-color: $accent;
+  border-width: 0;
+}
+
+.cardCornerTL {
+  top: -1px;
+  left: -1px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.cardCornerBR {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+.mortgageHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mortgageLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: $ink;
+}
+
+.mortgageApr {
+  font-size: 12.5px;
+  color: $muted;
+}
+
+.mortgageValue {
+  font-family: $serif;
+  font-size: 30px;
+  font-weight: 600;
+  color: $ink;
+  line-height: 1.1;
+}
+
+.mortgageUnit {
+  font-family: $sans;
+  font-size: 14px;
+  font-weight: 400;
+  color: $muted;
+}
+
+.mortgageNote {
+  font-size: 13px;
+  color: $muted;
+  margin-top: 8px;
+}

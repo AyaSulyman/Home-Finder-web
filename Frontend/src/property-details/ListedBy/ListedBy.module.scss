@@ -1,0 +1,66 @@
+@import "../shared/tokens.scss";
+
+.sectionHeading {
+  font-family: $serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: $ink;
+  margin: 0 0 14px;
+}
+
+.agentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.agentInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #eae5d6;
+  border: 1px solid $border-strong;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: $ink;
+  flex-shrink: 0;
+}
+
+.agentName {
+  font-size: 15px;
+  font-weight: 600;
+  color: $ink;
+}
+
+.agentRole {
+  font-size: 13px;
+  color: $muted;
+  margin-top: 1px;
+}
+
+.btnGhost {
+  font-family: $sans;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 4px;
+  border: 1px solid $border-strong;
+  background: transparent;
+  color: $ink;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $ink;
+  }
+}

@@ -1,0 +1,33 @@
+@import "../shared/tokens.scss";
+
+.sectionHeading {
+  font-family: $serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: $ink;
+  margin: 0 0 14px;
+}
+
+.amenitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 12px;
+  column-gap: 20px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.amenityItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  color: #3d3b33;
+}
+
+.check {
+  color: $accent;
+  font-weight: 700;
+}

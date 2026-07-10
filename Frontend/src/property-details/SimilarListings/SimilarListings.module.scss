@@ -1,0 +1,116 @@
+@import "../shared/tokens.scss";
+
+.similarSection {
+  background: $bg-alt;
+  padding: 56px 0 72px;
+}
+
+.container {
+  max-width: 1216px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.similarEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: $accent;
+  margin-bottom: 14px;
+
+  &::before {
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: $accent;
+  }
+}
+
+.similarHeading {
+  font-family: $serif;
+  font-size: 30px;
+  font-weight: 600;
+  color: $ink;
+  margin: 0 0 32px;
+}
+
+.similarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.similarCard {
+  position: relative;
+  background: $card;
+  border: 1px solid $border;
+  overflow: hidden;
+}
+
+.similarImage {
+  position: relative;
+  height: 190px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.similarBadge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: $dark;
+  color: #fbf9f3;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 5px 9px;
+  border-radius: 3px;
+}
+
+.similarBadgeRent {
+  composes: similarBadge;
+  background: $rent-badge;
+}
+
+.similarBody {
+  padding: 18px 20px 22px;
+  position: relative;
+}
+
+.similarPrice {
+  font-family: $serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: $ink;
+}
+
+.similarTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: $ink;
+  margin-top: 6px;
+}
+
+.similarLocation {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: $muted;
+  margin-top: 6px;
+}
+
+.pin {
+  color: #c0472f;
+  flex-shrink: 0;
+}

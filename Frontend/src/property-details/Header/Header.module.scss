@@ -1,0 +1,98 @@
+@import "../shared/tokens.scss";
+
+.header {
+  border-bottom: 1px solid $border;
+  background: $bg;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  max-width: 1216px;
+  margin: 0 auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: $serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: $ink;
+}
+
+.logoIcon {
+  width: 20px;
+  height: 20px;
+  color: $ink;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.navLink {
+  font-size: 14.5px;
+  color: $muted;
+  text-decoration: none;
+  padding-bottom: 4px;
+
+  &:hover {
+    color: $ink;
+  }
+}
+
+.navLinkActive {
+  composes: navLink;
+  color: $ink;
+  font-weight: 600;
+  border-bottom: 2px solid $ink;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btnGhost {
+  font-family: $sans;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 4px;
+  border: 1px solid $border-strong;
+  background: transparent;
+  color: $ink;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $ink;
+  }
+}
+
+.btnDark {
+  font-family: $sans;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 4px;
+  border: none;
+  background: $dark;
+  color: #fbf9f3;
+  cursor: pointer;
+
+  &:hover {
+    background: $dark-hover;
+  }
+}
