@@ -215,10 +215,7 @@ const statusClassName = (status: StatusValue) => {
 };
 
 const StatusPill: React.FC<{ status: StatusValue }> = ({ status }) => (
-  <span className={statusClassName(status)}>
-    <span className={styles.statusDot} />
-    {status}
-  </span>
+  <span className={statusClassName(status)}>{status}</span>
 );
 
 const PropertyThumb: React.FC<{ title: string }> = ({ title }) => (
