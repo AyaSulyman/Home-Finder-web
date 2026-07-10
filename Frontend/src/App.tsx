@@ -7,6 +7,8 @@ import SellerDashboard, {
   AddListingPage,
   BuyerDashboard,
 } from "./seller-dashboard/SellerDashboard";
+import Login from "./auth/Login";
+import Signup from "./auth/Signup";
 
 const App: React.FC = () => {
   return (
@@ -18,6 +20,8 @@ const App: React.FC = () => {
       <Route path="/browse-properties" element={<BrowseProperties />} />
       <Route path="/property-details" element={<PropertyDetails />} />
       <Route path="/property/:id" element={<PropertyDetails />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
     </Routes>
   );
 };

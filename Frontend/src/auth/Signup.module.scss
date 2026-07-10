@@ -1,0 +1,160 @@
+.page {
+  min-height: 100vh;
+  background: #f8f6f1;
+}
+
+.signupPage {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.formWrap {
+  width: 100%;
+  max-width: 760px;
+}
+
+.eyebrow {
+  color: #9a5b17;
+  letter-spacing: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 36px;
+  color: #102018;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.subtitle {
+  margin: 14px 0 32px;
+  color: #6f746f;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.roleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.roleCard,
+.roleCardActive {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #d9d3c5;
+  background: white;
+  cursor: pointer;
+  transition: 0.2s;
+
+  input {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #b9aa91;
+    border-radius: 50%;
+    background: white;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  input:checked {
+    border-color: #9a5b17;
+  }
+
+  input:checked::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #9a5b17;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+  }
+
+  strong {
+    display: block;
+    color: #102018;
+  }
+
+  span {
+    color: #6f746f;
+    font-size: 13px;
+  }
+}
+
+.roleCardActive {
+  border: 2px solid #9a5b17;
+  background: #fffaf1;
+}
+
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #d9d3c5;
+  padding: 0 14px;
+  font-size: 14px;
+  background: white;
+}
+
+.checkbox {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  input {
+    accent-color: #9a5b17;
+  }
+}
+
+.signupButton {
+  height: 50px;
+  background: #102018;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.adminNote {
+  text-align: center;
+  color: #6f746f;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .roleGrid,
+  .twoColumns {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}
