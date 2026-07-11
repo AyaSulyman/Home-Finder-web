@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes";
 import propertyRoutes from "./routes/property.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import appointmentRoutes from "./routes/appointment.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
 
 
 const app = express();
@@ -52,6 +53,11 @@ app.use(
 app.use(
     "/api/appointments",
     appointmentRoutes
+);
+
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
 );
 
 
