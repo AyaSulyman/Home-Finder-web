@@ -10,7 +10,7 @@ import {
 
     recommendedProperties,
 
-    searchProperty,
+    getProperties,
 
     propertyStatistics,
 
@@ -28,17 +28,20 @@ router.post(
 );
 
 
+router.get(
 
+    "/",
+
+    getProperties
+
+);
 router.get(
     "/recommended",
     recommendedProperties
 );
 
 
-router.get(
-    "/search",
-    searchProperty
-);
+
 
 
 

@@ -14,7 +14,7 @@ import {
 
 import {
 
-    searchProperties,
+    getAllProperties,
 
     getPropertyStatistics,
      getFeaturedProperties
@@ -114,55 +114,45 @@ async(
 
 };
 
-export const searchProperty =
-async(
-    req:Request,
-    res:Response
-)=>{
+export const getProperties = async (
 
+    req: Request,
 
-    try{
+    res: Response
 
+) => {
 
-        const properties =
-            await searchProperties(
-                req.query
-            );
+    try {
 
+        const result = await getAllProperties(
 
+            req.query
+
+        );
 
         res.status(200).json({
 
-            success:true,
+            success: true,
 
-            count:
-            properties.length,
-
-
-            data:properties
-
+            ...result
 
         });
-
-
-
-    }catch(error:any){
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
 
     }
 
+    catch (error: any) {
+
+        res.status(500).json({
+
+            success: false,
+
+            message: error.message
+
+        });
+
+    }
 
 };
-
 
 
 

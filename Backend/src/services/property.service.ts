@@ -36,162 +36,208 @@ export const getRecommendedProperties = async()=>{
 
 };
 
-export const searchProperties = async (
-    filters:any
+export const getAllProperties = async (
+    queryParams: any
 ) => {
-
 
     const {
 
-        keyword,
+        page = 1,
 
-        location,
+        limit = 6,
+
+        keyword,
 
         propertyType,
 
+        bedrooms,
+
+        bathrooms,
+
         minPrice,
 
-        maxPrice
+        maxPrice,
 
+        listingType,
 
-    } = filters;
+        status,
 
+        sort = "newest"
 
+    } = queryParams;
 
-    const query:any = {};
+    const query: any = {};
 
-
-
-    // Search keyword
-    if(keyword){
-
+    if (keyword) {
 
         query.$or = [
 
             {
-                title:{
-                    $regex:keyword,
-                    $options:"i"
+
+                title: {
+
+                    $regex: keyword,
+
+                    $options: "i"
+
                 }
+
             },
 
+            {
+
+                address: {
+
+                    $regex: keyword,
+
+                    $options: "i"
+
+                }
+
+            },
 
             {
-                description:{
-                    $regex:keyword,
-                    $options:"i"
+
+                city: {
+
+                    $regex: keyword,
+
+                    $options: "i"
+
                 }
+
             }
 
         ];
 
     }
 
+    if (propertyType) {
 
-
-
-
-    // Location filter
-
-    if(location){
-
-
-        query.$or = [
-
-            {
-                city:{
-                    $regex:location,
-                    $options:"i"
-                }
-            },
-
-
-            {
-                address:{
-                    $regex:location,
-                    $options:"i"
-                }
-            }
-
-
-        ];
+        query.propertyType = propertyType;
 
     }
 
+    if (listingType) {
 
-
-
-
-
-
-    // Property type
-
-    if(propertyType){
-
-
-        query.propertyType =
-            propertyType;
-
+        query.listingType = listingType;
 
     }
 
+    if (status) {
 
+        query.status = status;
 
+    }
 
+    if (bedrooms) {
 
+        query.bedrooms = {
 
+            $gte: Number(bedrooms)
 
-    // Price range
+        };
 
-    if(
-        minPrice ||
-        maxPrice
-    ){
+    }
 
+    if (bathrooms) {
+
+        query.bathrooms = {
+
+            $gte: Number(bathrooms)
+
+        };
+
+    }
+
+    if (minPrice || maxPrice) {
 
         query.price = {};
 
+        if (minPrice) {
 
-
-        if(minPrice){
-
-            query.price.$gte =
-                Number(minPrice);
+            query.price.$gte = Number(minPrice);
 
         }
 
+        if (maxPrice) {
 
-
-        if(maxPrice){
-
-            query.price.$lte =
-                Number(maxPrice);
+            query.price.$lte = Number(maxPrice);
 
         }
-
 
     }
 
+    let sortOption: any = {
 
+        createdAt: -1
 
+    };
 
+    switch (sort) {
 
+        case "oldest":
 
+            sortOption = {
 
-    const properties =
-        await Property.find(query)
-        .sort({
-            createdAt:-1
-        });
+                createdAt: 1
 
+            };
 
+            break;
 
+        case "priceAsc":
 
-    return properties;
+            sortOption = {
 
+                price: 1
+
+            };
+
+            break;
+
+        case "priceDesc":
+
+            sortOption = {
+
+                price: -1
+
+            };
+
+            break;
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const properties = await Property.find(query)
+
+        .sort(sortOption)
+
+        .skip(skip)
+
+        .limit(Number(limit));
+
+    const total = await Property.countDocuments(query);
+
+    return {
+
+        properties,
+
+        pagination: {
+
+            currentPage: Number(page),
+
+            totalPages: Math.ceil(total / Number(limit)),
+
+            totalProperties: total,
+
+            limit: Number(limit)
+
+        }
+
+    };
 
 };
-
 
 
 
