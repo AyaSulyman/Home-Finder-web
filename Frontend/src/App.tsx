@@ -9,6 +9,7 @@ import SellerDashboard, {
 } from "./seller-dashboard/SellerDashboard";
 import Login from "./auth/Login";
 import Signup from "./auth/Signup";
+import Home from "./home/Home";
 
 const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const App: React.FC = () => {
       <Route path="/property/:id" element={<PropertyDetails />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/home" element={<Home />} />
     </Routes>
   );
 };
