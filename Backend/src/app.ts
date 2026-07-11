@@ -3,6 +3,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/auth.routes";
 import propertyRoutes from "./routes/property.routes";
+import favoriteRoutes from "./routes/favorite.routes";
 
 
 const app = express();
@@ -40,6 +41,11 @@ app.use(
 app.use(
     "/api/properties",
     propertyRoutes
+);
+
+app.use(
+    "/api/favorites",
+    favoriteRoutes
 );
 
 
