@@ -158,3 +158,23 @@
     font-size: 28px;
   }
 }
+
+.passwordWrapper {
+  position: relative;
+}
+
+
+.passwordWrapper input {
+  padding-right: 45px;
+}
+
+
+.eyeIcon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #777;
+  font-size: 18px;
+}

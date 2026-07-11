@@ -232,3 +232,50 @@
     font-size: 13px;
   }
 }
+
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+
+.passwordWrapper .input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+
+
+.eyeButton {
+  position: absolute;
+
+  right: 12px;
+
+  top: 35%;
+
+  transform: translateY(-50%);
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #777;
+
+  font-size: 18px;
+
+  padding: 0;
+
+}
+
+
+.eyeButton:hover {
+  color: #000;
+}
