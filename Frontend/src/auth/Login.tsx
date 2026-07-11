@@ -180,12 +180,12 @@ const Login: React.FC = () => {
 
 
 
-    } catch(error:any) {
+    } catch(error: unknown) {
 
 
       message.error(
 
-        error.message ||
+        (error instanceof Error ? error.message : "Login failed") ||
         "Login failed"
 
       );
