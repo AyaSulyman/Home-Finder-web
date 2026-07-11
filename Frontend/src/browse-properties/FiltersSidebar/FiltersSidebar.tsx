@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import styles from "./FiltersSidebar.module.scss";
 
-const PROPERTY_TYPES = ["House", "Apartment", "Villa", "Townhouse", "Office"];
+const PROPERTY_TYPES = [
+"all",
+"House",
+"Apartment",
+"Villa",
+"Townhouse",
+"Office"
+];
 const BEDROOM_OPTIONS = ["Any", "2+", "3+", "4+", "5+"];
 const BATHROOM_OPTIONS = ["Any", "2+", "3+", "4+"];
 
@@ -31,35 +38,79 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
 }) => {
   const [priceMin, setPriceMin] = useState(initial?.priceMin ?? 120_000);
   const [priceMax, setPriceMax] = useState(initial?.priceMax ?? 980_000);
-  const [propertyType, setPropertyType] = useState(
-    initial?.propertyType ?? "House"
-  );
-  const [bedrooms, setBedrooms] = useState(initial?.bedrooms ?? "2+");
+const [propertyType, setPropertyType] =
+useState(
+initial?.propertyType ?? "all"
+);
+const [bedrooms, setBedrooms] =
+useState(initial?.bedrooms ?? "Any");
   const [bathrooms, setBathrooms] = useState(initial?.bathrooms ?? "Any");
-  const [forSale, setForSale] = useState(initial?.forSale ?? true);
+  const [forSale, setForSale] =
+useState(initial?.forSale ?? false);
   const [forRent, setForRent] = useState(initial?.forRent ?? false);
 
-  const handleReset = () => {
-    setPriceMin(MIN_PRICE);
-    setPriceMax(MAX_PRICE);
-    setPropertyType("House");
-    setBedrooms("Any");
-    setBathrooms("Any");
-    setForSale(true);
-    setForRent(false);
-  };
+ const handleReset = () => {
 
-  const handleApply = () => {
+    const resetValues = {
+
+        priceMin: MIN_PRICE,
+
+        priceMax: MAX_PRICE,
+
+        propertyType: "all",
+
+        bedrooms: "Any",
+
+        bathrooms: "Any",
+
+        forSale: false,
+
+        forRent: false
+
+    };
+
+
+    setPriceMin(resetValues.priceMin);
+
+    setPriceMax(resetValues.priceMax);
+
+    setPropertyType(resetValues.propertyType);
+
+    setBedrooms(resetValues.bedrooms);
+
+    setBathrooms(resetValues.bathrooms);
+
+    setForSale(resetValues.forSale);
+
+    setForRent(resetValues.forRent);
+
+
+    onApply?.(resetValues);
+
+};
+ const handleApply = () => {
+
+
     onApply?.({
-      priceMin,
-      priceMax,
-      propertyType,
-      bedrooms,
-      bathrooms,
-      forSale,
-      forRent,
+
+        priceMin,
+
+        priceMax,
+
+        propertyType,
+
+        bedrooms,
+
+        bathrooms,
+
+        forSale,
+
+        forRent,
+
     });
-  };
+
+
+};
 
   const handleMinChange = (value: number) => {
     setPriceMin(Math.min(value, priceMax - 10_000));
@@ -119,18 +170,39 @@ const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
       <section className={styles.section}>
         <h3 className={styles.label}>Property type</h3>
         <div className={styles.pillGrid}>
-          {PROPERTY_TYPES.map((type) => (
-            <button
-              type="button"
-              key={type}
-              className={
-                propertyType === type ? styles.pillActive : styles.pill
-              }
-              onClick={() => setPropertyType(type)}
-            >
-              {type}
-            </button>
-          ))}
+       {PROPERTY_TYPES.map((type)=>(
+
+<button
+
+type="button"
+
+key={type}
+
+className={
+propertyType === type
+?
+styles.pillActive
+:
+styles.pill
+}
+
+onClick={()=>setPropertyType(type)}
+
+>
+
+{
+type === "all"
+?
+"All types"
+:
+type
+}
+
+
+</button>
+
+
+))}
         </div>
       </section>
 
