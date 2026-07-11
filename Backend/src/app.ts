@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 
 import authRoutes from "./routes/auth.routes";
+import propertyRoutes from "./routes/property.routes";
 
 
 const app = express();
@@ -34,6 +35,11 @@ app.use((req, res, next) => {
 app.use(
     "/api/auth",
     authRoutes
+);
+
+app.use(
+    "/api/properties",
+    propertyRoutes
 );
 
 
