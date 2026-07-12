@@ -88,3 +88,14 @@ export const getPropertyDetails = async (
     return response.data;
 
 };
+
+export const getFeaturedProperties = async () => {
+
+    const response = await axios.get(
+        `${API_URL}/featured`
+    );
+
+
+    return response.data;
+
+};

@@ -20,6 +20,9 @@ import {
     getProperties
 } from "../actions/propertyActions";
 
+import {
+    useSearchParams
+} from "react-router-dom";
 
 import type {
     PropertyListing
@@ -29,6 +32,11 @@ import type {
 
 const BrowseProperties:React.FC = ()=>{
 
+const [searchParams] = useSearchParams();
+
+
+const urlKeyword =
+    searchParams.get("keyword") || "";
 
 const [listings,setListings] =
 useState<PropertyListing[]>([]);
@@ -54,10 +62,29 @@ useState<any>({
 
     limit:6,
 
-    sort:"newest"
+    sort:"newest",
+
+    keyword: urlKeyword || undefined
 
 });
+useEffect(()=>{
 
+    const keyword =
+        searchParams.get("keyword");
+
+
+    setFilters((prev:any)=>({
+
+        ...prev,
+
+        page:1,
+
+        keyword: keyword || undefined
+
+    }));
+
+
+},[searchParams]);
 
 
 

@@ -35,26 +35,46 @@ const [property,setProperty]=useState<any>(null);
 
 
 
-useEffect(()=>{
+useEffect(() => {
+
+  if (!id) return;
 
 
-fetch(
-`http://localhost:5000/api/properties/${id}`
-)
+  const fetchProperty = async () => {
 
-.then(res=>res.json())
+    try {
 
-.then(data=>{
-
-
-setProperty(data.data);
+      const response = await fetch(
+        `http://localhost:5000/api/properties/${id}`
+      );
 
 
-})
+      const data = await response.json();
 
 
-},[id]);
+      if(data.success){
 
+        setProperty(data.data);
+
+      }
+
+
+    } catch(error) {
+
+      console.log(
+        "Property details error:",
+        error
+      );
+
+    }
+
+  };
+
+
+  fetchProperty();
+
+
+}, [id]);
 
 
 
@@ -77,22 +97,22 @@ return (
 
 
 <Breadcrumb
-
-trail={[
-"Home",
-"Browse Properties"
-]}
-
-current={property.title}
-
+  trail={[
+    "Home",
+    "Browse Properties"
+  ]}
+  current={property.title}
 />
 
 
 
 <Gallery
-    images={property.images}
+  images={
+    property.images?.length > 0
+      ? property.images
+      : [property.image]
+  }
 />
-
 
 <div className={styles.mainGrid}>
 
