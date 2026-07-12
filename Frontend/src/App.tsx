@@ -15,7 +15,7 @@ import Home from "./home/Home";
 const App: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<SellerDashboard />} />
+      <Route path="/" element={<Home />} />
       <Route path="/seller-dashboard" element={<SellerDashboard />} />
       <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
       <Route path="/add-listing" element={<AddListingPage />} />

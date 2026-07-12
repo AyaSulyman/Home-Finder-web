@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import app from "./app";
 
 import connectDatabase from "./config/database";
+import createAdmin from "./seeds/createAdmin";
 
 
 
@@ -21,22 +22,21 @@ const startServer = async () => {
 
         // Connect MongoDB
 
-        await connectDatabase();
+   connectDatabase()
+.then(async()=>{
+
+    await createAdmin();
 
 
+    app.listen(PORT,()=>{
 
-        // Start Express
-
-        app.listen(
-            PORT,
-            () => {
-
-                console.log(
-                    `Server running on port ${PORT}`
-                );
-
-            }
+        console.log(
+            `Server running on port ${PORT}`
         );
+
+    });
+
+});
 
 
     } catch (error) {
