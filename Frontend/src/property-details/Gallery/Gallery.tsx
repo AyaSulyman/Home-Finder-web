@@ -1,34 +1,114 @@
 import React from "react";
 import styles from "./Gallery.module.scss";
-import HouseIllustration from "../shared/HouseIllustration";
 
 interface GalleryProps {
-  extraPhotosCount?: number;
+  images?: string[];
 }
 
-const Gallery: React.FC<GalleryProps> = ({ extraPhotosCount = 12 }) => {
+const Gallery: React.FC<GalleryProps> = ({
+  images = [],
+}) => {
+
+
+  const mainImage =
+    images.length > 0
+      ? images[0]
+      : "/placeholder-property.jpg";
+
+
+  const thumbnails =
+    images.slice(1, 4);
+
+
+
+  const extraPhotosCount =
+    images.length > 4
+      ? images.length - 4
+      : 0;
+
+
+
   return (
+
     <div className={styles.gallery}>
+
+
       <div className={styles.galleryMain}>
-        <HouseIllustration variant="hero" />
+
+        <img
+          src={mainImage}
+          alt="Property"
+          className={styles.mainImage}
+        />
+
       </div>
+
+
+
       <div className={styles.galleryGrid}>
-        <div className={styles.galleryThumb}>
-          <HouseIllustration variant="thumb" />
-        </div>
-        <div className={styles.galleryThumb}>
-          <HouseIllustration variant="thumb" />
-        </div>
-        <div className={styles.galleryThumb}>
-          <HouseIllustration variant="thumb" />
-        </div>
-        <div className={styles.galleryThumb}>
-          <HouseIllustration variant="thumb" darken />
-          <div className={styles.galleryOverlay}>+{extraPhotosCount} photos</div>
-        </div>
+
+
+        {
+          thumbnails.map(
+            (image,index)=>(
+
+              <div
+                className={styles.galleryThumb}
+                key={index}
+              >
+
+                <img
+                  src={image}
+                  alt={`Property ${index + 1}`}
+                  className={styles.thumbImage}
+                />
+
+              </div>
+
+            )
+          )
+        }
+
+
+
+        {
+          extraPhotosCount > 0 && (
+
+          <div className={styles.galleryThumb}>
+
+
+            <img
+              src={
+                images[4]
+              }
+              alt="More property photos"
+              className={styles.thumbImage}
+            />
+
+
+            <div className={styles.galleryOverlay}>
+
+              +{extraPhotosCount} photos
+
+            </div>
+
+
+          </div>
+
+          )
+
+        }
+
+
+
       </div>
+
+
     </div>
+
   );
+
 };
+
 
 export default Gallery;

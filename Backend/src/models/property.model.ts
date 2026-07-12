@@ -4,6 +4,7 @@ import mongoose, {
 } from "mongoose";
 
 
+
 export interface IProperty extends Document {
 
 
@@ -17,6 +18,9 @@ export interface IProperty extends Document {
 
 
     image: string;
+
+
+    images: string[];
 
 
     address: string;
@@ -37,10 +41,32 @@ export interface IProperty extends Document {
     area: number;
 
 
+    yearBuilt: number;
+
+
+    garage: number;
+
+
     description: string;
 
 
+    amenities: string[];
+
+
+    agent: {
+
+        name: string;
+
+        role: string;
+
+        company: string;
+
+    };
+
+
     isFeatured: boolean;
+
+
     isFeaturedProperty: boolean;
 
 
@@ -49,9 +75,9 @@ export interface IProperty extends Document {
 
 
 
+
 const propertySchema =
 new Schema<IProperty>(
-
 
 {
 
@@ -64,6 +90,7 @@ new Schema<IProperty>(
     },
 
 
+
     price: {
 
         type: Number,
@@ -73,114 +100,211 @@ new Schema<IProperty>(
     },
 
 
+
     listingType: {
 
         type: String,
 
-        enum:[
+        enum: [
             "sale",
             "rent"
         ],
 
-        required:true
+        required: true
 
     },
+
 
 
     image: {
 
-        type:String,
+        type: String,
 
-        required:true
+        required: true
 
     },
+
+
+
+    images: {
+
+        type: [String],
+
+        default: []
+
+    },
+
 
 
     address: {
 
-        type:String,
+        type: String,
 
-        required:true
+        required: true
 
     },
+
 
 
     city: {
 
-        type:String,
+        type: String,
 
-        required:true
+        required: true
 
     },
+
 
 
     propertyType: {
 
-        type:String,
+        type: String,
 
-        required:true
+        required: true
 
     },
+
 
 
     bedrooms: {
 
-        type:Number,
+        type: Number,
 
-        default:0
+        default: 0
 
     },
+
 
 
     bathrooms: {
 
-        type:Number,
+        type: Number,
 
-        default:0
+        default: 0
 
     },
+
 
 
     area: {
 
-        type:Number,
+        type: Number,
 
-        default:0
+        default: 0
 
     },
+
+
+
+    yearBuilt: {
+
+        type: Number,
+
+        default: 0
+
+    },
+
+
+
+    garage: {
+
+        type: Number,
+
+        default: 0
+
+    },
+
 
 
     description: {
 
-        type:String
+        type: String,
+
+        default: ""
 
     },
+
+
+
+    amenities: {
+
+        type: [String],
+
+        default: []
+
+    },
+
+
+
+    agent: {
+
+        name: {
+
+            type: String,
+
+            default: "HomeFinder Agent"
+
+        },
+
+
+        role: {
+
+            type: String,
+
+            default: "Licensed Agent"
+
+        },
+
+
+        company: {
+
+            type: String,
+
+            default: "HomeFinder"
+
+        }
+
+    },
+
 
 
     isFeatured: {
 
-        type:Boolean,
+        type: Boolean,
 
-        default:false
+        default: false
 
     },
-    isFeaturedProperty:{
-    type:Boolean,
-    default:false
-}
+
+
+
+    isFeaturedProperty: {
+
+        type: Boolean,
+
+        default: false
+
+    }
+
 
 },
 
+
 {
-    timestamps:true
+
+    timestamps: true
+
 }
 
 );
+
 
 
 
 export default mongoose.model<IProperty>(
-    "Property",
-    propertySchema
-);
 
+    "Property",
+
+    propertySchema
+
+);

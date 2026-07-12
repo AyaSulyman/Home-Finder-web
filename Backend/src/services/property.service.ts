@@ -2,18 +2,23 @@ import Property from "../models/property.model";
 
 
 
-export const createProperty = async(
-    data:any
-)=>{
+export const createProperty = async(data:any)=>{
+
+    const propertyData = {
+        ...data,
+
+        images:
+            data.images && data.images.length > 0
+                ? data.images
+                : [
+                    data.image
+                ]
+    };
 
 
-    return await Property.create(data);
-
+    return await Property.create(propertyData);
 
 };
-
-
-
 
 
 export const getRecommendedProperties = async()=>{
@@ -301,5 +306,12 @@ async()=>{
 
     return properties;
 
+
+};
+export const getPropertyById = async (
+    id:string
+) => {
+
+    return await Property.findById(id);
 
 };

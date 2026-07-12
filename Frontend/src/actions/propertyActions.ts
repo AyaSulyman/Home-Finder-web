@@ -75,3 +75,16 @@ export const getProperties = async (
 
 
 };
+
+export const getPropertyDetails = async (
+    id:string
+) => {
+
+    const response = await axios.get(
+        `${API_URL}/${id}`
+    );
+
+
+    return response.data;
+
+};

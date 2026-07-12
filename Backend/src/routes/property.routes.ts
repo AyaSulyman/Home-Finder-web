@@ -14,7 +14,8 @@ import {
 
     propertyStatistics,
 
-    featuredProperties
+    featuredProperties,
+     propertyDetails
 
 } from "../controllers/property.controller";
 
@@ -53,5 +54,10 @@ router.get(
 router.get(
     "/featured",
     featuredProperties
+);
+
+router.get(
+    "/:id",
+    propertyDetails
 );
 export default router;

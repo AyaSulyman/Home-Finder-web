@@ -8,17 +8,11 @@ import styles from "./BrowseProperties.module.scss";
 
 
 import Header from "../property-details/Header/Header";
-
 import Breadcrumb from "../property-details/Breadcrumb/Breadcrumb";
-
 import SearchBar from "./SearchBar/SearchBar";
-
 import FiltersSidebar from "./FiltersSidebar/FiltersSidebar";
-
 import ResultsHeader from "./ResultsHeader/ResultsHeader";
-
 import PropertyGrid from "./PropertyGrid/PropertyGrid";
-
 import Pagination from "./Pagination/Pagination";
 
 
@@ -53,7 +47,8 @@ useState(false);
 
 
 
-const [filters,setFilters] = useState<any>({
+const [filters,setFilters] =
+useState<any>({
 
     page:1,
 
@@ -84,26 +79,23 @@ await getProperties(filters);
 
 const formatted =
 response.properties.map(
-(item:any)=>(
+(item:any)=>({
 
-{
 
 id:item._id,
 
+
 status:
-item.status === "rent"
+item.listingType === "rent"
 ?
 "FOR RENT"
 :
-item.status === "pending"
-?
-"PENDING"
-:
-"FOR SALE",
+"PENDING",
+
 
 
 price:
-item.listingType==="rent"
+item.listingType === "rent"
 ?
 `$${item.price}/mo`
 :
@@ -114,6 +106,7 @@ item.listingType==="rent"
 title:item.title,
 
 
+
 address:
 `${item.address}, ${item.city}`,
 
@@ -122,18 +115,20 @@ address:
 beds:item.bedrooms,
 
 
+
 baths:item.bathrooms,
+
 
 
 sqft:item.area,
 
 
+
 image:item.image
 
 
-}
 
-)
+})
 );
 
 
@@ -157,7 +152,10 @@ response.pagination.totalPages
 }
 catch(error){
 
-console.log(error);
+console.log(
+"Properties loading error",
+error
+);
 
 }
 finally{
@@ -172,9 +170,12 @@ setLoading(false);
 
 
 
+
 useEffect(()=>{
 
+
 loadProperties();
+
 
 },[filters]);
 
@@ -182,35 +183,47 @@ loadProperties();
 
 
 
-const handleSearch = (data:any)=>{
+
+
+const handleSearch = (
+data:any
+)=>{
 
 
 setFilters({
 
-    page:1,
 
-    limit:6,
-
-    sort:"newest",
-
-    keyword:
-        data.location || undefined,
+page:1,
 
 
-    propertyType:
-        data.propertyType !== "all"
-        ?
-        data.propertyType
-        :
-        undefined,
+limit:6,
 
 
-    bedrooms:
-        data.bedrooms !== "any"
-        ?
-        data.bedrooms
-        :
-        undefined
+sort:"newest",
+
+
+
+keyword:
+data.location || undefined,
+
+
+
+propertyType:
+data.propertyType !== "all"
+?
+data.propertyType
+:
+undefined,
+
+
+
+bedrooms:
+data.bedrooms !== "any"
+?
+data.bedrooms
+:
+undefined
+
 
 
 });
@@ -221,75 +234,96 @@ setFilters({
 
 
 
-const handleFilters = (data:any)=>{
-
-
-const newFilters:any = {
-
-
-    ...filters,
-
-
-    page:1,
-
-
-    minPrice:data.priceMin,
-
-
-    maxPrice:data.priceMax,
 
 
 
-    propertyType:
-        data.propertyType !== "all"
-        ?
-        data.propertyType
-        :
-        undefined,
+const handleFilters = (
+data:any
+)=>{
 
 
 
-    bedrooms:
-        data.bedrooms !== "Any"
-        ?
-        data.bedrooms.replace("+","")
-        :
-        undefined,
+setFilters({
+
+
+...filters,
+
+
+page:1,
 
 
 
-    bathrooms:
-        data.bathrooms !== "Any"
-        ?
-        data.bathrooms.replace("+","")
-        :
-        undefined,
+minPrice:
+data.priceMin,
 
 
 
-    status:
-        data.forSale && data.forRent
-        ?
-        undefined
-        :
-        data.forSale
-        ?
-        "sale"
-        :
-        data.forRent
-        ?
-        "rent"
-        :
-        undefined
+maxPrice:
+data.priceMax,
+
+
+
+propertyType:
+data.propertyType !== "all"
+?
+data.propertyType
+:
+undefined,
+
+
+
+bedrooms:
+data.bedrooms !== "Any"
+?
+data.bedrooms.replace("+","")
+:
+undefined,
+
+
+
+bathrooms:
+data.bathrooms !== "Any"
+?
+data.bathrooms.replace("+","")
+:
+undefined,
+
+
+
+listingType:
+
+data.forSale && data.forRent
+
+?
+undefined
+
+:
+
+data.forSale
+
+?
+"sale"
+
+:
+
+data.forRent
+
+?
+"rent"
+
+:
+
+undefined
+
+
+
+});
+
+
 
 };
 
 
-
-setFilters(newFilters);
-
-
-};
 
 
 
@@ -299,7 +333,7 @@ return (
 <div className={styles.page}>
 
 
-<Header active="browse" />
+<Header active="browse"/>
 
 
 
@@ -310,16 +344,25 @@ return (
 
 
 <Breadcrumb
-trail={["Home"]}
+
+trail={[
+"Home"
+]}
+
 current="Browse Properties"
+
 />
 
 
 
 <SearchBar
+
 defaultLocation="Lakeview, IL"
+
 onSearch={handleSearch}
+
 />
+
 
 
 </div>
@@ -341,7 +384,9 @@ onSearch={handleSearch}
 
 
 <FiltersSidebar
+
 onApply={handleFilters}
+
 />
 
 
@@ -350,59 +395,111 @@ onApply={handleFilters}
 
 
 
+
 <div>
+
 
 
 <ResultsHeader
 
+
 resultCount={total}
+
 
 location="Lakeview, IL"
 
+
 onSortChange={
-(sort)=>
+(sort)=>{
+
+
+let backendSort="newest";
+
+
+if(sort==="price-asc")
+backendSort="priceAsc";
+
+
+if(sort==="price-desc")
+backendSort="priceDesc";
+
+
+
 setFilters({
+
 ...filters,
-sort
-})
+
+sort:backendSort
+
+});
+
+
 }
+
+}
+
 
 />
 
 
 
+
+
+
 {
-loading ?
+loading
+
+?
 
 <p>
 Loading properties...
 </p>
 
+
 :
 
 <PropertyGrid
+
 listings={listings}
+
 />
 
+
 }
+
+
 
 
 
 <Pagination
 
+
 totalPages={pages}
+
 
 onPageChange={
 (page)=>
+
 setFilters({
+
 ...filters,
+
 page
+
 })
+
 }
+
 
 />
 
 
+
+
+</div>
+
+
+
 </div>
 
 
@@ -411,8 +508,6 @@ page
 
 </div>
 
-
-</div>
 
 );
 

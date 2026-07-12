@@ -3,21 +3,19 @@ import {
     Response
 } from "express";
 
-
 import {
 
     createProperty,
 
-    getRecommendedProperties
-
-} from "../services/property.service";
-
-import {
+    getRecommendedProperties,
 
     getAllProperties,
 
     getPropertyStatistics,
-     getFeaturedProperties
+
+    getFeaturedProperties,
+
+    getPropertyById
 
 } from "../services/property.service";
 
@@ -200,7 +198,72 @@ async(
 
 
 };
+export const propertyDetails = async (
+    req: Request,
+    res: Response
+) => {
 
+    try {
+
+        const { id } = req.params;
+
+
+        if (!id || Array.isArray(id)) {
+
+            return res.status(400).json({
+
+                success:false,
+
+                message:"Invalid property id"
+
+            });
+
+        }
+
+
+        const property =
+            await getPropertyById(id);
+
+
+
+        if (!property) {
+
+            return res.status(404).json({
+
+                success:false,
+
+                message:"Property not found"
+
+            });
+
+        }
+
+
+
+        res.status(200).json({
+
+            success:true,
+
+            data:property
+
+        });
+
+
+    } catch(error:any) {
+
+
+        res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+
+    }
+
+};
 export const featuredProperties =
 async(
     req:Request,
