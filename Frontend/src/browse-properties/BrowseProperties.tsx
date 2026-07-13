@@ -3,9 +3,11 @@ import React, {
     useState
 } from "react";
 
+import {
+    useSearchParams
+} from "react-router-dom";
 
 import styles from "./BrowseProperties.module.scss";
-
 
 import Header from "../property-details/Header/Header";
 import Breadcrumb from "../property-details/Breadcrumb/Breadcrumb";
@@ -15,528 +17,759 @@ import ResultsHeader from "./ResultsHeader/ResultsHeader";
 import PropertyGrid from "./PropertyGrid/PropertyGrid";
 import Pagination from "./Pagination/Pagination";
 
-
 import {
     getProperties
 } from "../actions/propertyActions";
-
-import {
-    useSearchParams
-} from "react-router-dom";
 
 import type {
     PropertyListing
 } from "./shared/types";
 
 
+const BrowseProperties: React.FC = () => {
 
-const BrowseProperties:React.FC = ()=>{
 
-const [searchParams] = useSearchParams();
+    const [searchParams] =
+        useSearchParams();
 
 
-const urlKeyword =
-    searchParams.get("keyword") || "";
 
-const [listings,setListings] =
-useState<PropertyListing[]>([]);
+    const urlKeyword =
+        searchParams.get("keyword") || "";
 
 
-const [total,setTotal] =
-useState(0);
 
+    const [listings, setListings] =
+        useState<PropertyListing[]>([]);
 
-const [pages,setPages] =
-useState(1);
 
 
-const [loading,setLoading] =
-useState(false);
+    const [total, setTotal] =
+        useState(0);
 
 
 
-const [filters,setFilters] =
-useState<any>({
+    const [pages, setPages] =
+        useState(1);
 
-    page:1,
 
-    limit:6,
 
-    sort:"newest",
+    const [loading, setLoading] =
+        useState(false);
 
-    keyword: urlKeyword || undefined
 
-});
-useEffect(()=>{
 
-    const keyword =
-        searchParams.get("keyword");
+    const [error, setError] =
+        useState("");
 
 
-    setFilters((prev:any)=>({
 
-        ...prev,
+    const [filters, setFilters] =
+        useState<any>({
 
-        page:1,
+            page: 1,
 
-        keyword: keyword || undefined
+            limit: 6,
 
-    }));
+            sort: "newest",
 
+            keyword:
+                urlKeyword || undefined
 
-},[searchParams]);
+        });
 
 
 
+    useEffect(() => {
 
-const loadProperties = async()=>{
 
+        const keyword =
+            searchParams.get("keyword");
 
-try{
 
 
-setLoading(true);
+        setFilters((prev:any)=>({
 
+            ...prev,
 
+            page:1,
 
-const response =
-await getProperties(filters);
+            keyword:
+                keyword || undefined
 
+        }));
 
 
-const formatted =
-response.properties.map(
-(item:any)=>({
+    },[searchParams]);
 
 
-id:item._id,
 
 
-status:
-item.listingType === "rent"
-?
-"FOR RENT"
-:
-"PENDING",
 
+    const loadProperties =
+    async()=>{
 
 
-price:
-item.listingType === "rent"
-?
-`$${item.price}/mo`
-:
-`$${item.price.toLocaleString()}`,
+        try {
 
 
+            setLoading(true);
 
-title:item.title,
+            setError("");
 
 
 
-address:
-`${item.address}, ${item.city}`,
+            const response =
+                await getProperties(filters);
 
 
 
-beds:item.bedrooms,
 
+          const properties =
+    response.properties ||
+    response.data?.properties ||
+    response.data?.items ||
+    [];
+    const formatted =
+    properties.map(
+        (item:any)=>({
+             
 
 
-baths:item.bathrooms,
+                    id:item._id,
 
 
 
-sqft:item.area,
+                    status:
+                        item.listingType === "rent"
+                        ?
+                        "FOR RENT"
+                        :
+                        "FOR SALE",
 
 
 
-image:item.image
 
+                    price:
+                        item.listingType === "rent"
+                        ?
+                        `$${item.price.toLocaleString()}/mo`
+                        :
+                        `$${item.price.toLocaleString()}`,
 
 
-})
-);
 
 
 
-setListings(formatted);
+                    title:item.title,
 
+
+
+
+
+                    address:
+
+                        item.address?.street
+
+                        ?
+
+                        `${item.address.street}, ${item.address.city}`
+
+                        :
+
+                        `${item.address}, ${item.city}`,
+
+
+
+
+
+                    beds:
+                        item.bedrooms,
+
+
+
+
+
+                    baths:
+                        item.bathrooms,
+
+
+
+
+
+                    sqft:
+                        item.area,
+
+
+
+
+
+                    image:
+
+                        item.image
+
+                        ||
+
+                        item.images?.find(
+                            (img:any)=>
+                                img.isCover
+                        )?.url
+
+                        ||
+
+                        item.images?.[0]?.url
+
+                        ||
+
+                        ""
+
+                })
+
+            );
+
+
+
+            setListings(formatted);
 
 
 setTotal(
-response.pagination.totalProperties
+    response.pagination?.totalProperties ||
+    response.data?.total ||
+    0
 );
-
 
 
 setPages(
-response.pagination.totalPages
+    response.pagination?.totalPages ||
+    response.data?.totalPages ||
+    1
 );
 
 
+        }
 
-}
-catch(error){
+        catch(err:any){
 
-console.log(
-"Properties loading error",
-error
-);
 
-}
-finally{
+            console.log(
+                "Properties loading error",
+                err
+            );
 
-setLoading(false);
 
-}
+            setListings([]);
 
 
-};
+            setTotal(0);
 
 
+            setPages(1);
 
 
 
-useEffect(()=>{
+            setError(
+                err?.message ||
+                "Failed to load properties"
+            );
 
 
-loadProperties();
+        }
 
+        finally{
 
-},[filters]);
 
+            setLoading(false);
 
 
+        }
 
 
+    };
 
 
-const handleSearch = (
-data:any
-)=>{
 
 
-setFilters({
 
+    useEffect(()=>{
 
-page:1,
 
+        loadProperties();
 
-limit:6,
 
+    },[filters]);
 
-sort:"newest",
 
 
 
-keyword:
-data.location || undefined,
 
 
 
-propertyType:
-data.propertyType !== "all"
-?
-data.propertyType
-:
-undefined,
 
+    const handleSearch =
+    (data:any)=>{
 
 
-bedrooms:
-data.bedrooms !== "any"
-?
-data.bedrooms
-:
-undefined
+        setFilters({
 
 
+            page:1,
 
-});
 
+            limit:6,
 
-};
 
+            sort:"newest",
 
 
 
 
+            keyword:
 
+                data.location
 
-const handleFilters = (
-data:any
-)=>{
+                ?
 
+                data.location
 
+                :
 
-setFilters({
+                undefined,
 
 
-...filters,
 
 
-page:1,
+            propertyType:
 
+                data.propertyType !== "all"
 
+                ?
 
-minPrice:
-data.priceMin,
+                data.propertyType
 
+                :
 
+                undefined,
 
-maxPrice:
-data.priceMax,
 
 
 
-propertyType:
-data.propertyType !== "all"
-?
-data.propertyType
-:
-undefined,
 
+            bedrooms:
 
+                data.bedrooms !== "any"
 
-bedrooms:
-data.bedrooms !== "Any"
-?
-data.bedrooms.replace("+","")
-:
-undefined,
+                ?
 
+                data.bedrooms
 
+                :
 
-bathrooms:
-data.bathrooms !== "Any"
-?
-data.bathrooms.replace("+","")
-:
-undefined,
+                undefined
 
 
+        });
 
-listingType:
 
-data.forSale && data.forRent
+    };
 
-?
-undefined
 
-:
 
-data.forSale
 
-?
-"sale"
 
-:
 
-data.forRent
 
-?
-"rent"
 
-:
 
-undefined
 
+    const handleFilters =
+    (data:any)=>{
 
 
-});
+        setFilters({
 
+            ...filters,
 
 
-};
+            page:1,
 
 
 
 
+            minPrice:
+                data.priceMin,
 
 
-return (
 
-<div className={styles.page}>
 
+            maxPrice:
+                data.priceMax,
 
-<Header active="browse"/>
 
 
 
-<div className={styles.toolbarSection}>
+            propertyType:
 
+                data.propertyType !== "all"
 
-<div className={styles.container}>
+                ?
 
+                data.propertyType
 
-<Breadcrumb
+                :
 
-trail={[
-"Home"
-]}
+                undefined,
 
-current="Browse Properties"
 
-/>
 
 
+            bedrooms:
 
-<SearchBar
+                data.bedrooms !== "Any"
 
-defaultLocation="Lakeview, IL"
+                ?
 
-onSearch={handleSearch}
+                data.bedrooms.replace("+","")
 
-/>
+                :
 
+                undefined,
 
 
-</div>
 
 
-</div>
 
+            bathrooms:
 
+                data.bathrooms !== "Any"
 
+                ?
 
+                data.bathrooms.replace("+","")
 
-<div className={styles.container}>
+                :
 
+                undefined,
 
-<div className={styles.mainGrid}>
 
 
-<aside>
 
 
-<FiltersSidebar
+            listingType:
 
-onApply={handleFilters}
 
-/>
+                data.forSale &&
+                data.forRent
 
 
-</aside>
+                ?
 
+                undefined
 
 
 
+                :
 
-<div>
 
 
+                data.forSale
 
-<ResultsHeader
 
+                ?
 
-resultCount={total}
+                "sale"
 
 
-location="Lakeview, IL"
 
+                :
 
-onSortChange={
-(sort)=>{
 
 
-let backendSort="newest";
+                data.forRent
 
 
-if(sort==="price-asc")
-backendSort="priceAsc";
+                ?
 
+                "rent"
 
-if(sort==="price-desc")
-backendSort="priceDesc";
 
 
+                :
 
-setFilters({
+                undefined
 
-...filters,
 
-sort:backendSort
+        });
 
-});
 
+    };
 
-}
 
-}
 
 
-/>
 
 
 
 
 
 
-{
-loading
+    const handleSort =
+    (sort:string)=>{
 
-?
 
-<p>
-Loading properties...
-</p>
+        let backendSort =
+            "newest";
 
 
-:
 
-<PropertyGrid
+        if(sort === "price-asc")
+            backendSort="priceAsc";
 
-listings={listings}
 
-/>
 
+        if(sort === "price-desc")
+            backendSort="priceDesc";
 
-}
 
 
+        setFilters({
 
+            ...filters,
 
+            page:1,
 
-<Pagination
+            sort:backendSort
 
+        });
 
-totalPages={pages}
 
+    };
 
-onPageChange={
-(page)=>
 
-setFilters({
 
-...filters,
 
-page
 
-})
 
-}
 
 
-/>
 
+    return (
 
+        <div className={styles.page}>
 
 
-</div>
+            <Header active="browse"/>
 
 
 
-</div>
 
 
-</div>
+            <div className={styles.toolbarSection}>
 
 
-</div>
+                <div className={styles.container}>
 
 
-);
+                    <Breadcrumb
+
+                        trail={[
+                            "Home"
+                        ]}
+
+                        current="Browse Properties"
+
+                    />
+
+
+
+
+
+                    <SearchBar
+
+                        defaultLocation="Lakeview, IL"
+
+                        onSearch={
+                            handleSearch
+                        }
+
+                    />
+
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div className={styles.container}>
+
+
+                <div className={styles.mainGrid}>
+
+
+
+
+                    <aside>
+
+
+                        <FiltersSidebar
+
+                            onApply={
+                                handleFilters
+                            }
+
+                        />
+
+
+                    </aside>
+
+
+
+
+
+
+
+
+
+                    <div>
+
+
+
+                        <ResultsHeader
+
+
+                            resultCount={
+                                total
+                            }
+
+
+                            location="All locations"
+
+
+                            onSortChange={
+                                handleSort
+                            }
+
+
+                        />
+
+
+
+
+
+                        {
+                            loading &&
+
+                            <p className={styles.stateMessage}>
+                                Loading properties...
+                            </p>
+                        }
+
+
+
+
+
+                        {
+                            error &&
+
+                            <p
+                                className={styles.errorMessage}
+                                role="alert"
+                            >
+                                {error}
+                            </p>
+                        }
+
+
+
+
+
+                        {
+                            !loading &&
+                            !error &&
+                            listings.length === 0 &&
+
+                            <p className={styles.stateMessage}>
+                                No properties found.
+                            </p>
+                        }
+
+
+
+
+
+
+
+                        {
+                            !loading &&
+                            !error &&
+
+                            <PropertyGrid
+
+                                listings={
+                                    listings
+                                }
+
+                            />
+
+                        }
+
+
+
+
+
+
+
+                        {
+                            pages > 1 &&
+
+                            <Pagination
+
+
+                                totalPages={
+                                    pages
+                                }
+
+
+                                onPageChange={
+                                    (page)=>
+
+                                    setFilters({
+
+                                        ...filters,
+
+                                        page
+
+                                    })
+                                }
+
+
+                            />
+
+                        }
+
+
+
+
+                    </div>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+    );
 
 
 };

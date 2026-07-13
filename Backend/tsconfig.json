@@ -9,5 +9,11 @@
   },
   "include": [
     "src/**/*"
-  ]
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ],
+  "ts-node": {
+    "files": true
+  }
 }

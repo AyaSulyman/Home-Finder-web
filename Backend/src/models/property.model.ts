@@ -1,310 +1,325 @@
-import mongoose, {
-    Schema,
-    Document
-} from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
+export type ListingType = "sale" | "rent";
 
+export type PropertyType =
+    | "house"
+    | "apartment"
+    | "villa"
+    | "land"
+    | "townhouse";
+
+export type PropertyStatus =
+    | "draft"
+    | "active"
+    | "sold"
+    | "rented"
+    | "archived";
+
+export interface PropertyAddress {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+}
+
+export interface PropertyImage {
+    url: string;
+    order: number;
+    isCover: boolean;
+}
+
+export interface AvailabilitySlot {
+    date: Date;
+    times: string[];
+}
+
+export interface AgentInfo {
+    name: string;
+    role: string;
+    company: string;
+}
 
 export interface IProperty extends Document {
-
+    sellerId: Types.ObjectId;
 
     title: string;
 
+    description: string;
+
+    listingType: ListingType;
+
+    propertyType: PropertyType;
 
     price: number;
 
-
-    listingType: "sale" | "rent";
-
-
-    image: string;
-
-
-    images: string[];
-
-
-    address: string;
-
-
-    city: string;
-
-
-    propertyType: string;
-
+    address: PropertyAddress;
 
     bedrooms: number;
 
-
     bathrooms: number;
-
 
     area: number;
 
-
     yearBuilt: number;
-
 
     garage: number;
 
-
-    description: string;
-
-
     amenities: string[];
 
+    image: string;
 
-    agent: {
+    images: PropertyImage[];
 
-        name: string;
+    availability: AvailabilitySlot[];
 
-        role: string;
-
-        company: string;
-
-    };
-
+    agent: AgentInfo;
 
     isFeatured: boolean;
 
-
     isFeaturedProperty: boolean;
 
+    status: PropertyStatus;
 
+    views: number;
+
+    createdAt: Date;
+
+    updatedAt: Date;
 }
 
-
-
-
-
-const propertySchema =
-new Schema<IProperty>(
-
-{
-
-    title: {
-
-        type: String,
-
-        required: true
-
-    },
-
-
-
-    price: {
-
-        type: Number,
-
-        required: true
-
-    },
-
-
-
-    listingType: {
-
-        type: String,
-
-        enum: [
-            "sale",
-            "rent"
-        ],
-
-        required: true
-
-    },
-
-
-
-    image: {
-
-        type: String,
-
-        required: true
-
-    },
-
-
-
-    images: {
-
-        type: [String],
-
-        default: []
-
-    },
-
-
-
-    address: {
-
-        type: String,
-
-        required: true
-
-    },
-
-
-
-    city: {
-
-        type: String,
-
-        required: true
-
-    },
-
-
-
-    propertyType: {
-
-        type: String,
-
-        required: true
-
-    },
-
-
-
-    bedrooms: {
-
-        type: Number,
-
-        default: 0
-
-    },
-
-
-
-    bathrooms: {
-
-        type: Number,
-
-        default: 0
-
-    },
-
-
-
-    area: {
-
-        type: Number,
-
-        default: 0
-
-    },
-
-
-
-    yearBuilt: {
-
-        type: Number,
-
-        default: 0
-
-    },
-
-
-
-    garage: {
-
-        type: Number,
-
-        default: 0
-
-    },
-
-
-
-    description: {
-
-        type: String,
-
-        default: ""
-
-    },
-
-
-
-    amenities: {
-
-        type: [String],
-
-        default: []
-
-    },
-
-
-
-    agent: {
-
-        name: {
-
+const addressSchema = new Schema<PropertyAddress>(
+    {
+        street: {
             type: String,
-
-            default: "HomeFinder Agent"
-
+            required: true,
+            trim: true
         },
 
-
-        role: {
-
+        city: {
             type: String,
-
-            default: "Licensed Agent"
-
+            required: true,
+            trim: true,
+            index: true
         },
 
-
-        company: {
-
+        state: {
             type: String,
+            required: true,
+            trim: true
+        },
 
-            default: "HomeFinder"
-
+        zipCode: {
+            type: String,
+            required: true,
+            trim: true
         }
-
     },
-
-
-
-    isFeatured: {
-
-        type: Boolean,
-
-        default: false
-
-    },
-
-
-
-    isFeaturedProperty: {
-
-        type: Boolean,
-
-        default: false
-
+    {
+        _id: false
     }
-
-
-},
-
-
-{
-
-    timestamps: true
-
-}
-
 );
 
+const imageSchema = new Schema<PropertyImage>(
+    {
+        url: {
+            type: String,
+            required: true,
+            trim: true
+        },
 
+        order: {
+            type: Number,
+            default: 0
+        },
 
+        isCover: {
+            type: Boolean,
+            default: false
+        }
+    },
+    {
+        _id: false
+    }
+);
 
-export default mongoose.model<IProperty>(
+const availabilitySchema = new Schema<AvailabilitySlot>(
+    {
+        date: {
+            type: Date,
+            required: true
+        },
 
+        times: [
+            {
+                type: String
+            }
+        ]
+    },
+    {
+        _id: false
+    }
+);
+
+const propertySchema = new Schema<IProperty>(
+    {
+        sellerId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            index: true
+        },
+
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 150
+        },
+
+        description: {
+            type: String,
+            default: "",
+            maxlength: 5000
+        },
+
+        listingType: {
+            type: String,
+            enum: ["sale", "rent"],
+            required: true
+        },
+
+        propertyType: {
+            type: String,
+            enum: [
+                "house",
+                "apartment",
+                "villa",
+                "land",
+                "townhouse"
+            ],
+            required: true,
+            index: true
+        },
+
+        price: {
+            type: Number,
+            required: true,
+            min: 0,
+            index: true
+        },
+
+        address: {
+            type: addressSchema,
+            required: true
+        },
+
+        bedrooms: {
+            type: Number,
+            default: 0
+        },
+
+        bathrooms: {
+            type: Number,
+            default: 0
+        },
+
+        area: {
+            type: Number,
+            default: 0
+        },
+
+        yearBuilt: {
+            type: Number,
+            default: 0
+        },
+
+        garage: {
+            type: Number,
+            default: 0
+        },
+
+        amenities: {
+            type: [String],
+            default: []
+        },
+
+        image: {
+            type: String,
+            default: ""
+        },
+
+        images: {
+            type: [imageSchema],
+            default: []
+        },
+
+        availability: {
+            type: [availabilitySchema],
+            default: []
+        },
+
+        agent: {
+            name: {
+                type: String,
+                default: "HomeFinder Agent"
+            },
+
+            role: {
+                type: String,
+                default: "Licensed Agent"
+            },
+
+            company: {
+                type: String,
+                default: "HomeFinder"
+            }
+        },
+
+        isFeatured: {
+            type: Boolean,
+            default: false,
+            index: true
+        },
+
+        isFeaturedProperty: {
+            type: Boolean,
+            default: false,
+            index: true
+        },
+
+        status: {
+            type: String,
+            enum: [
+                "draft",
+                "active",
+                "sold",
+                "rented",
+                "archived"
+            ],
+            default: "draft",
+            index: true
+        },
+
+        views: {
+            type: Number,
+            default: 0
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
+propertySchema.index({
+    title: "text",
+    description: "text",
+    "address.city": "text"
+});
+
+const Property = mongoose.model<IProperty>(
     "Property",
-
     propertySchema
-
 );
+
+export default Property;

@@ -29,3 +29,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+.stateMessage,
+.errorMessage {
+  padding: 48px 0;
+  text-align: center;
+}
+
+.errorMessage {
+  color: #b42318;
+}

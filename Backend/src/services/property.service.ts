@@ -1,242 +1,459 @@
-import Property from "../models/property.model";
+import Property, {
+    type ListingType,
+    type PropertyStatus,
+    type PropertyType,
+    type PropertyAddress,
+    type PropertyImage,
+    type AvailabilitySlot
+} from "../models/property.model";
+
+import AppError from "../utils/appError";
+
+
+export interface PropertyInput {
+
+    title:string;
+
+    description:string;
+
+    listingType:ListingType;
+
+    propertyType:PropertyType | string;
+
+    price:number;
+
+    address:PropertyAddress | string;
+
+    city?:string;
+
+    image?:string;
+
+    bedrooms:number;
+
+    bathrooms:number;
+
+    area:number;
+
+    amenities?:string[];
+
+    images?:PropertyImage[];
+
+    availability?:AvailabilitySlot[];
+
+    status?:PropertyStatus;
+
+}
 
 
 
-export const createProperty = async(data:any)=>{
+export interface PropertySearch {
 
-    const propertyData = {
+    page?:number;
+
+    limit?:number;
+
+    keyword?:string;
+
+    location?:string;
+
+    propertyType?:string;
+
+    listingType?:ListingType;
+
+    bedrooms?:number;
+
+    bathrooms?:number;
+
+    minPrice?:number;
+
+    maxPrice?:number;
+
+    status?:string;
+
+    sort?:
+    | "newest"
+    | "oldest"
+    | "priceAsc"
+    | "priceDesc";
+
+}
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| CREATE
+|--------------------------------------------------------------------------
+*/
+
+export const createProperty = async(
+    sellerId:string,
+    data:PropertyInput
+)=>{
+
+
+    const propertyData:any = {
+
         ...data,
 
-        images:
-            data.images && data.images.length > 0
-                ? data.images
-                : [
-                    data.image
-                ]
+        sellerId,
+
+
+        propertyType:
+            String(data.propertyType)
+            .toLowerCase(),
+
+
+        status:
+            data.status || "active"
+
     };
 
 
-    return await Property.create(propertyData);
+    return Property.create(propertyData);
 
 };
 
 
-export const getRecommendedProperties = async()=>{
 
 
-    return await Property.find({
 
-        isFeatured:true
+/*
+|--------------------------------------------------------------------------
+| PUBLIC LIST
+|--------------------------------------------------------------------------
+*/
 
-    })
 
-    .limit(6)
+export const listPublicProperties = async(
+    search:PropertySearch
+)=>{
 
-    .sort({
 
-        createdAt:-1
+    const page =
+        Math.max(
+            1,
+            Number(search.page)||1
+        );
 
-    });
 
+    const limit =
+        Math.min(
+            50,
+            Math.max(
+                1,
+                Number(search.limit)||6
+            )
+        );
+
+
+
+  const filter:any = {
+
+    $or:[
+        {
+            status:"active"
+        },
+        {
+            status:{
+                $exists:false
+            }
+        }
+    ]
 
 };
 
-export const getAllProperties = async (
-    queryParams: any
-) => {
 
-    const {
 
-        page = 1,
+    /*
+      Support old properties without status
+    */
 
-        limit = 6,
+    if(search.status){
 
-        keyword,
+        filter.status =
+            search.status;
 
-        propertyType,
+    }
+    else{
 
-        bedrooms,
-
-        bathrooms,
-
-        minPrice,
-
-        maxPrice,
-
-        listingType,
-
-        status,
-
-        sort = "newest"
-
-    } = queryParams;
-
-    const query: any = {};
-
-    if (keyword) {
-
-        query.$or = [
+        filter.$or=[
 
             {
-
-                title: {
-
-                    $regex: keyword,
-
-                    $options: "i"
-
-                }
-
+                status:"active"
             },
 
             {
-
-                address: {
-
-                    $regex: keyword,
-
-                    $options: "i"
-
+                status:{
+                    $exists:false
                 }
-
-            },
-
-            {
-
-                city: {
-
-                    $regex: keyword,
-
-                    $options: "i"
-
-                }
-
             }
 
         ];
 
     }
 
-    if (propertyType) {
 
-        query.propertyType = propertyType;
 
-    }
 
-    if (listingType) {
 
-        query.listingType = listingType;
+if (search.keyword) {
 
-    }
+    const regex = new RegExp(
+        search.keyword,
+        "i"
+    );
 
-    if (status) {
-
-        query.status = status;
-
-    }
-
-    if (bedrooms) {
-
-        query.bedrooms = {
-
-            $gte: Number(bedrooms)
-
-        };
-
-    }
-
-    if (bathrooms) {
-
-        query.bathrooms = {
-
-            $gte: Number(bathrooms)
-
-        };
-
-    }
-
-    if (minPrice || maxPrice) {
-
-        query.price = {};
-
-        if (minPrice) {
-
-            query.price.$gte = Number(minPrice);
-
-        }
-
-        if (maxPrice) {
-
-            query.price.$lte = Number(maxPrice);
-
-        }
-
-    }
-
-    let sortOption: any = {
-
-        createdAt: -1
-
+    filter.$expr = {
+        $or: [
+            {
+                $regexMatch: {
+                    input: "$title",
+                    regex
+                }
+            },
+            {
+                $regexMatch: {
+                    input: "$description",
+                    regex
+                }
+            },
+            {
+                $regexMatch: {
+                    input: "$city",
+                    regex
+                }
+            },
+            {
+                $regexMatch: {
+                    input: {
+                        $cond: [
+                            {
+                                $isArray: "$address"
+                            },
+                            "",
+                            {
+                                $toString: "$address"
+                            }
+                        ]
+                    },
+                    regex
+                }
+            }
+        ]
     };
 
-    switch (sort) {
+}
 
-        case "oldest":
 
-            sortOption = {
 
-                createdAt: 1
 
-            };
 
-            break;
 
-        case "priceAsc":
 
-            sortOption = {
 
-                price: 1
 
-            };
+    if(search.propertyType){
 
-            break;
+        filter.propertyType={
 
-        case "priceDesc":
+            $regex:
+            search.propertyType,
 
-            sortOption = {
+     
 
-                price: -1
+        };
 
-            };
-
-            break;
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
 
-    const properties = await Property.find(query)
 
-        .sort(sortOption)
 
-        .skip(skip)
 
-        .limit(Number(limit));
+    if(search.listingType){
 
-    const total = await Property.countDocuments(query);
+        filter.listingType =
+            search.listingType;
+
+    }
+
+
+
+
+
+    if(search.bedrooms){
+
+        filter.bedrooms={
+
+            $gte:
+            Number(search.bedrooms)
+
+        };
+
+    }
+
+
+
+
+
+    if(search.bathrooms){
+
+        filter.bathrooms={
+
+            $gte:
+            Number(search.bathrooms)
+
+        };
+
+    }
+
+
+
+
+
+    if(
+        search.minPrice ||
+        search.maxPrice
+    ){
+
+        filter.price={};
+
+
+        if(search.minPrice)
+            filter.price.$gte =
+                Number(search.minPrice);
+
+
+        if(search.maxPrice)
+            filter.price.$lte =
+                Number(search.maxPrice);
+
+    }
+
+
+
+
+
+    let sort:any={
+        createdAt:-1
+    };
+
+
+    if(search.sort==="oldest")
+        sort={
+            createdAt:1
+        };
+
+
+    if(search.sort==="priceAsc")
+        sort={
+            price:1
+        };
+
+
+    if(search.sort==="priceDesc")
+        sort={
+            price:-1
+        };
+
+
+
+
+
+    const [
+        items,
+        total
+    ]=await Promise.all([
+
+
+        Property.find(filter)
+
+        .sort(sort)
+
+        .skip(
+            (page-1)*limit
+        )
+
+        .limit(limit)
+
+        .lean(),
+
+
+
+        Property.countDocuments(filter)
+
+    ]);
+
+
+
+
 
     return {
 
-        properties,
+        items,
 
-        pagination: {
+        page,
 
-            currentPage: Number(page),
+        limit,
 
-            totalPages: Math.ceil(total / Number(limit)),
+        total,
 
-            totalProperties: total,
+        totalPages:
+            Math.ceil(
+                total/limit
+            )
 
-            limit: Number(limit)
+    };
+
+
+};
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| FRONTEND COMPATIBILITY
+|--------------------------------------------------------------------------
+*/
+
+
+export const getAllProperties = async(
+    query:PropertySearch
+)=>{
+
+
+    const result =
+        await listPublicProperties(query);
+
+
+
+    return {
+
+        properties:
+            result.items,
+
+
+        pagination:{
+
+            currentPage:
+                result.page,
+
+
+            totalPages:
+                result.totalPages,
+
+
+            totalProperties:
+                result.total,
+
+
+            limit:
+                result.limit
 
         }
 
@@ -245,6 +462,70 @@ export const getAllProperties = async (
 };
 
 
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| FEATURED
+|--------------------------------------------------------------------------
+*/
+
+
+export const getFeaturedProperties =
+()=>
+
+
+Property.find({
+
+    isFeaturedProperty:true
+
+})
+
+.sort({
+
+    createdAt:-1
+
+})
+
+.limit(6);
+
+
+
+
+
+
+export const getRecommendedProperties =
+()=>
+
+
+Property.find({
+
+    isFeatured:true
+
+})
+
+.sort({
+
+    createdAt:-1
+
+})
+
+.limit(6);
+
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| STATISTICS
+|--------------------------------------------------------------------------
+*/
 
 
 export const getPropertyStatistics =
@@ -259,59 +540,243 @@ async()=>{
     const activeListings =
         await Property.countDocuments({
 
-            isFeatured:true
+            $or:[
+
+                {
+                    status:"active"
+                },
+
+                {
+                    status:{
+                        $exists:false
+                    }
+                }
+
+            ]
 
         });
 
 
 
     const agents =
-        640;
+        await Property.distinct(
+            "sellerId"
+        );
 
 
 
     return {
 
+        totalProperties,
+
         activeListings,
 
-        agents,
-
-        totalProperties
+        agents:
+            agents.length
 
     };
 
-
 };
 
-export const getFeaturedProperties =
-async()=>{
-
-
-    const properties =
-        await Property.find({
-
-            isFeaturedProperty:true
-
-        })
-
-        .limit(6)
-
-        .sort({
-
-            createdAt:-1
-
-        });
 
 
 
-    return properties;
 
 
-};
-export const getPropertyById = async (
-    id:string
+
+/*
+|--------------------------------------------------------------------------
+| DETAILS
+|--------------------------------------------------------------------------
+*/
+
+
+export const getPropertyById =
+(id:string)=>
+Property.findById(id);
+
+
+
+
+
+export const getProperty = async (
+    id: string,
+    viewerId?: string
 ) => {
 
-    return await Property.findById(id);
+    const property = await Property.findById(id);
+
+    if (!property) {
+        throw new AppError(
+            "Property not found",
+            404
+        );
+    }
+
+
+    // old database properties do not have status/sellerId
+    // allow them to be visible
+    if (
+        property.status &&
+        property.status !== "active" &&
+        property.sellerId &&
+        property.sellerId.toString() !== viewerId
+    ) {
+        throw new AppError(
+            "Property not found",
+            404
+        );
+    }
+
+
+    return property;
+};
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| SELLER
+|--------------------------------------------------------------------------
+*/
+
+
+export const listSellerProperties =
+(
+    sellerId:string
+)=>
+
+Property.find({
+
+    sellerId
+
+})
+
+.sort({
+
+    createdAt:-1
+
+});
+
+
+
+
+
+
+const getOwnedProperty =
+async(
+    id:string,
+    sellerId:string
+)=>{
+
+
+    const property =
+        await Property.findById(id);
+
+
+
+    if(!property)
+        throw new AppError(
+            "Property not found",
+            404
+        );
+
+
+
+    if(
+        property.sellerId &&
+        property.sellerId.toString()
+        !== sellerId
+    ){
+
+        throw new AppError(
+            "You do not own this property",
+            403
+        );
+
+    }
+
+
+
+    return property;
+
+};
+
+
+
+
+
+
+export const updateProperty =
+async(
+    id:string,
+    sellerId:string,
+    data:Partial<PropertyInput>
+)=>{
+
+
+    const property =
+        await getOwnedProperty(
+            id,
+            sellerId
+        );
+
+
+
+    Object.assign(
+        property,
+        data
+    );
+
+
+
+    return property.save();
+
+};
+
+
+
+
+
+
+export const updatePropertyStatus =
+(
+    id:string,
+    sellerId:string,
+    status:PropertyStatus
+)=>
+
+updateProperty(
+    id,
+    sellerId,
+    {
+        status
+    }
+);
+
+
+
+
+
+
+
+export const deleteProperty =
+async(
+    id:string,
+    sellerId:string
+)=>{
+
+
+    const property =
+        await getOwnedProperty(
+            id,
+            sellerId
+        );
+
+
+    await property.deleteOne();
 
 };

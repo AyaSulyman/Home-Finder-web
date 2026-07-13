@@ -1,307 +1,270 @@
+import type { Request, Response } from "express";
 import {
-    Request,
-    Response
-} from "express";
-
-import {
-
     createProperty,
-
-    getRecommendedProperties,
-
+    deleteProperty,
+    getProperty,
+    getPropertyById,
     getAllProperties,
-
-    getPropertyStatistics,
-
     getFeaturedProperties,
-
-    getPropertyById
-
+    getRecommendedProperties,
+    getPropertyStatistics,
+    listPublicProperties,
+    listSellerProperties,
+    updateProperty,
+    updatePropertyStatus
 } from "../services/property.service";
 
+import AppError from "../utils/appError";
 
-export const addProperty = async(
-    req:Request,
-    res:Response
-)=>{
+const failure = (res: Response, error: unknown) => {
+    const status =
+        error instanceof AppError
+            ? error.statusCode
+            : 500;
 
+    const message =
+        error instanceof Error
+            ? error.message
+            : "Unexpected server error";
 
-    try{
-
-
-        const property =
-        await createProperty(
-            req.body
-        );
-
-
-        res.status(201).json({
-
-            success:true,
-
-            message:
-            "Property created successfully",
-
-            data:property
-
-        });
-
-
-    }catch(error:any){
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-
-    }
-
-
+    return res.status(status).json({
+        success: false,
+        message
+    });
 };
 
+const routeId = (value: string | string[]) =>
+    Array.isArray(value) ? value[0] : value;
 
+/* -------------------------------------------------------------------------- */
+/*                               PUBLIC APIS                                  */
+/* -------------------------------------------------------------------------- */
 
-
-
-
-
-
-export const recommendedProperties =
-async(
-    req:Request,
-    res:Response
-)=>{
-
-
-    try{
-
-
-        const properties =
-        await getRecommendedProperties();
-
-
-
-        res.status(200).json({
-
-            success:true,
-
-            data:properties
-
-        });
-
-
-    }catch(error:any){
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-
-    }
-
-
-};
-
-export const getProperties = async (
-
+export const searchProperties = async (
     req: Request,
-
     res: Response
-
 ) => {
 
+    const result =
+        await listPublicProperties(req.query);
+
+
+    res.json({
+
+        success:true,
+
+        properties: result.items,
+
+        pagination: {
+
+            currentPage: result.page,
+
+            totalPages: result.totalPages,
+
+            totalProperties: result.total,
+
+            limit: result.limit
+
+        }
+
+    });
+
+};
+export const getProperties = async (
+    req: Request,
+    res: Response
+) => {
     try {
+        const result = await getAllProperties(req.query);
 
-        const result = await getAllProperties(
-
-            req.query
-
-        );
-
-        res.status(200).json({
-
+        return res.json({
             success: true,
-
             ...result
-
         });
-
+    } catch (error) {
+        return failure(res, error);
     }
-
-    catch (error: any) {
-
-        res.status(500).json({
-
-            success: false,
-
-            message: error.message
-
-        });
-
-    }
-
 };
 
+export const featuredProperties = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await getFeaturedProperties();
 
-
-
-
-
-export const propertyStatistics =
-async(
-    req:Request,
-    res:Response
-)=>{
-
-
-    try{
-
-
-        const stats =
-            await getPropertyStatistics();
-
-
-
-        res.status(200).json({
-
-            success:true,
-
-            data:stats
-
+        return res.json({
+            success: true,
+            data
         });
-
-
-
-    }catch(error:any){
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-
+    } catch (error) {
+        return failure(res, error);
     }
-
-
 };
+
+export const recommendedProperties = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await getRecommendedProperties();
+
+        return res.json({
+            success: true,
+            data
+        });
+    } catch (error) {
+        return failure(res, error);
+    }
+};
+
+export const propertyStatistics = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await getPropertyStatistics();
+
+        return res.json({
+            success: true,
+            data
+        });
+    } catch (error) {
+        return failure(res, error);
+    }
+};
+
 export const propertyDetails = async (
     req: Request,
     res: Response
 ) => {
-
     try {
+        const id = routeId(req.params.id);
 
-        const { id } = req.params;
-
-
-        if (!id || Array.isArray(id)) {
-
-            return res.status(400).json({
-
-                success:false,
-
-                message:"Invalid property id"
-
-            });
-
-        }
-
-
-        const property =
-            await getPropertyById(id);
-
-
+        const property = req.user
+            ? await getProperty(id, req.user._id.toString())
+            : await getPropertyById(id);
 
         if (!property) {
-
             return res.status(404).json({
-
-                success:false,
-
-                message:"Property not found"
-
+                success: false,
+                message: "Property not found"
             });
-
         }
 
-
-
-        res.status(200).json({
-
-            success:true,
-
-            data:property
-
+        return res.json({
+            success: true,
+            message: "Property retrieved",
+            data: property
         });
-
-
-    } catch(error:any) {
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-
+    } catch (error) {
+        return failure(res, error);
     }
-
 };
-export const featuredProperties =
-async(
-    req:Request,
-    res:Response
-)=>{
 
+/* -------------------------------------------------------------------------- */
+/*                              SELLER DASHBOARD                              */
+/* -------------------------------------------------------------------------- */
 
-    try{
+export const createListing = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await createProperty(
+            req.user!._id.toString(),
+            req.body
+        );
 
-
-        const properties =
-            await getFeaturedProperties();
-
-
-
-        res.status(200).json({
-
-            success:true,
-
-            data:properties
-
+        return res.status(201).json({
+            success: true,
+            message: "Property created",
+            data
         });
-
-
-
-    }catch(error:any){
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-
+    } catch (error) {
+        return failure(res, error);
     }
+};
 
+export const addProperty = createListing;
 
+export const sellerListings = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await listSellerProperties(
+            req.user!._id.toString()
+        );
+
+        return res.json({
+            success: true,
+            message: "Seller properties retrieved",
+            data
+        });
+    } catch (error) {
+        return failure(res, error);
+    }
+};
+
+export const editListing = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await updateProperty(
+            routeId(req.params.id),
+            req.user!._id.toString(),
+            req.body
+        );
+
+        return res.json({
+            success: true,
+            message: "Property updated",
+            data
+        });
+    } catch (error) {
+        return failure(res, error);
+    }
+};
+
+export const changeListingStatus = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const data = await updatePropertyStatus(
+            routeId(req.params.id),
+            req.user!._id.toString(),
+            req.body.status
+        );
+
+        return res.json({
+            success: true,
+            message: "Property status updated",
+            data
+        });
+    } catch (error) {
+        return failure(res, error);
+    }
+};
+
+export const removeListing = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        await deleteProperty(
+            routeId(req.params.id),
+            req.user!._id.toString()
+        );
+
+        return res.json({
+            success: true,
+            message: "Property deleted",
+            data: null
+        });
+    } catch (error) {
+        return failure(res, error);
+    }
 };

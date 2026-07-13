@@ -1,5 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { message } from "antd";
+import { useNavigate } from "react-router-dom";
 import HouseIllustration from "../property-details/shared/HouseIllustration";
+import {
+  createPropertyAction,
+  deletePropertyAction,
+  type PropertyPayload,
+} from "../actions/propertyActions";
+import {
+  getBuyerDashboardAction,
+  getSellerDashboardAction,
+  type BuyerDashboardData,
+  type SellerDashboardData,
+} from "../actions/dashboardActions";
+import { updateAppointmentStatusAction } from "../actions/appointmentActions";
 import styles from "./SellerDashboard.module.scss";
 
 type Role = "buyer" | "seller";
@@ -261,7 +275,77 @@ const StatusPill: React.FC<{ status: RequestStatus | AppointmentStatus | Propert
   status,
 }) => <span className={statusClassName(status)}>{status}</span>;
 
-const SellerDashboard: React.FC = () => (
+const SellerDashboard: React.FC = () => {
+  const [dashboard, setDashboard] = useState<SellerDashboardData | null>(null);
+  const [dashboardError, setDashboardError] = useState("");
+
+  const loadDashboard = async () => {
+    try {
+      setDashboardError("");
+      setDashboard(await getSellerDashboardAction());
+    } catch (error) {
+      setDashboardError(error instanceof Error ? error.message : "Could not load dashboard");
+    }
+  };
+
+  useEffect(() => {
+    getSellerDashboardAction().then(setDashboard).catch((error) => {
+      setDashboardError(error instanceof Error ? error.message : "Could not load dashboard");
+    });
+  }, []);
+
+  const stats: StatCard[] = dashboard ? [
+    { label: "Active listings", value: String(dashboard.stats.activeListings), note: "Currently published" },
+    { label: "Total views", value: dashboard.stats.totalViews.toLocaleString(), note: "Across your listings" },
+    { label: "Pending requests", value: String(dashboard.stats.pendingRequests), note: "Needs response", alert: dashboard.stats.pendingRequests > 0 },
+    { label: "Confirmed viewings", value: String(dashboard.stats.confirmedViewings), note: "Upcoming" },
+  ] : SELLER_STATS;
+
+  const requests = dashboard?.recentRequests.map((request) => {
+    const buyer = request.buyerId;
+    const property = request.propertyId ?? {};
+    return {
+      id: request._id as string,
+      initials: `${buyer?.firstName?.[0] ?? "B"}${buyer?.lastName?.[0] ?? ""}`,
+      buyer: `${buyer?.firstName ?? "Buyer"} ${buyer?.lastName ?? ""}`.trim(),
+      property: property.title ?? "Property",
+      time: new Date(request.scheduledAt).toLocaleString(),
+      status: (request.status === "accepted" ? "Confirmed" : "Pending") as RequestStatus,
+      respond: request.status === "pending",
+    };
+  }) ?? sellerRequests.map((request) => ({ ...request, id: request.buyer }));
+
+  const properties = dashboard?.properties.map((property) => ({
+    id: property._id as string,
+    title: property.title as string,
+    address: [property.address?.street, property.address?.city].filter(Boolean).join(", "),
+    price: `$${Number(property.price ?? 0).toLocaleString()}`,
+    type: property.propertyType as string,
+    views: String(property.views ?? 0),
+    status: `${String(property.status ?? "draft")[0].toUpperCase()}${String(property.status ?? "draft").slice(1)}` as PropertyStatus,
+  })) ?? sellerProperties.map((property) => ({ ...property, id: property.title }));
+
+  const respond = async (id: string, status: "accepted" | "rejected") => {
+    try {
+      await updateAppointmentStatusAction(id, status);
+      message.success(`Appointment ${status}`);
+      await loadDashboard();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Could not update appointment");
+    }
+  };
+
+  const removeProperty = async (id: string) => {
+    try {
+      await deletePropertyAction(id);
+      message.success("Property deleted");
+      await loadDashboard();
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Could not delete property");
+    }
+  };
+
+  return (
   <DashboardShell
     role="seller"
     active="overview"
@@ -273,7 +357,8 @@ const SellerDashboard: React.FC = () => (
       </a>
     }
   >
-    <StatsGrid stats={SELLER_STATS} />
+    {dashboardError && <p role="alert">{dashboardError}</p>}
+    <StatsGrid stats={stats} />
 
     <section className={styles.panel}>
       <div className={styles.panelHeader}>
@@ -294,8 +379,8 @@ const SellerDashboard: React.FC = () => (
           <span>Action</span>
         </div>
 
-        {sellerRequests.map((request) => (
-          <div className={styles.requestRow} key={request.buyer}>
+        {requests.map((request) => (
+          <div className={styles.requestRow} key={request.id}>
             <div className={styles.personCell}>
               <span className={styles.initials}>{request.initials}</span>
               <strong>{request.buyer}</strong>
@@ -305,8 +390,8 @@ const SellerDashboard: React.FC = () => (
             <StatusPill status={request.status} />
             {request.respond ? (
               <div className={styles.actions}>
-                <button className={styles.acceptButton} type="button">Accept</button>
-                <button className={styles.declineButton} type="button">Decline</button>
+                <button onClick={() => respond(request.id, "accepted")} className={styles.acceptButton} type="button">Accept</button>
+                <button onClick={() => respond(request.id, "rejected")} className={styles.declineButton} type="button">Decline</button>
               </div>
             ) : (
               <a className={styles.detailsLink} href="#">View details</a>
@@ -337,8 +422,8 @@ const SellerDashboard: React.FC = () => (
           <span>Actions</span>
         </div>
 
-        {sellerProperties.map((property) => (
-          <div className={styles.propertyRow} key={property.title}>
+        {properties.map((property) => (
+          <div className={styles.propertyRow} key={property.id}>
             <PropertySummary title={property.title} address={property.address} />
             <span>{property.price}</span>
             <span>{property.type}</span>
@@ -346,14 +431,15 @@ const SellerDashboard: React.FC = () => (
             <StatusPill status={property.status} />
             <div className={styles.iconActions}>
               <button type="button" aria-label={`Edit ${property.title}`}>E</button>
-              <button type="button" aria-label={`Delete ${property.title}`}>D</button>
+              <button onClick={() => removeProperty(property.id)} type="button" aria-label={`Delete ${property.title}`}>D</button>
             </div>
           </div>
         ))}
       </div>
     </section>
   </DashboardShell>
-);
+  );
+};
 
 const PropertySummary: React.FC<{ title: string; address: string }> = ({ title, address }) => (
   <div className={styles.propertyCell}>
@@ -367,7 +453,62 @@ const PropertySummary: React.FC<{ title: string; address: string }> = ({ title, 
   </div>
 );
 
-export const BuyerDashboard: React.FC = () => (
+export const BuyerDashboard: React.FC = () => {
+  const [dashboard, setDashboard] = useState<BuyerDashboardData | null>(null);
+  const [dashboardError, setDashboardError] = useState("");
+
+  useEffect(() => {
+    getBuyerDashboardAction().then(setDashboard).catch((error) => {
+      setDashboardError(error instanceof Error ? error.message : "Could not load dashboard");
+    });
+  }, []);
+
+  const stats: StatCard[] = dashboard ? [
+    { label: "Saved homes", value: String(dashboard.stats.savedHomes), note: "In your favorites" },
+    { label: "Upcoming viewings", value: String(dashboard.stats.upcomingViewings), note: "Confirmed" },
+    { label: "Pending requests", value: String(dashboard.stats.pendingRequests), note: "Awaiting seller response" },
+    { label: "Past viewings", value: String(dashboard.stats.pastViewings), note: "Appointment history" },
+  ] : BUYER_STATS;
+
+  const appointments = dashboard?.appointments.map((appointment) => {
+    const property = appointment.propertyId ?? {};
+    const seller = appointment.sellerId;
+    const status = `${String(appointment.status)[0].toUpperCase()}${String(appointment.status).slice(1)}` as AppointmentStatus;
+    return {
+      id: appointment._id as string,
+      title: property.title ?? "Property",
+      address: [property.address?.street, property.address?.city].filter(Boolean).join(", "),
+      time: new Date(appointment.scheduledAt).toLocaleString(),
+      agent: `${seller?.firstName ?? "Seller"} ${seller?.lastName ?? ""}`.trim(),
+      status,
+      action: ["pending", "accepted"].includes(appointment.status) ? "Cancel" : "View details",
+    };
+  }) ?? buyerAppointments.map((appointment) => ({ ...appointment, id: appointment.title }));
+
+  const homes = dashboard?.favorites.map((favorite) => {
+    const property = favorite.propertyId ?? {};
+    return {
+      label: property.listingType === "rent" ? "FOR RENT" : "FOR SALE",
+      price: property.listingType === "rent"
+        ? `$${Number(property.price ?? 0).toLocaleString()}/mo`
+        : `$${Number(property.price ?? 0).toLocaleString()}`,
+      title: property.title ?? "Saved property",
+      location: property.address?.city ?? "",
+      rent: property.listingType === "rent",
+    };
+  }) ?? savedHomes;
+
+  const cancelAppointment = async (id: string) => {
+    try {
+      await updateAppointmentStatusAction(id, "cancelled");
+      setDashboard(await getBuyerDashboardAction());
+      message.success("Appointment cancelled");
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Could not cancel appointment");
+    }
+  };
+
+  return (
   <DashboardShell
     role="buyer"
     active="overview"
@@ -379,7 +520,8 @@ export const BuyerDashboard: React.FC = () => (
       </a>
     }
   >
-    <StatsGrid stats={BUYER_STATS} />
+    {dashboardError && <p role="alert">{dashboardError}</p>}
+    <StatsGrid stats={stats} />
 
     <section className={styles.panel}>
       <div className={styles.panelHeader}>
@@ -400,8 +542,8 @@ export const BuyerDashboard: React.FC = () => (
           <span />
         </div>
 
-        {buyerAppointments.map((appointment) => (
-          <div className={styles.appointmentRow} key={appointment.title}>
+        {appointments.map((appointment) => (
+          <div className={styles.appointmentRow} key={appointment.id}>
             <PropertySummary title={appointment.title} address={appointment.address} />
             <span>{appointment.time}</span>
             <span>{appointment.agent}</span>
@@ -411,6 +553,12 @@ export const BuyerDashboard: React.FC = () => (
                 appointment.action === "Cancel" ? styles.cancelLink : styles.detailsLink
               }
               href="#"
+              onClick={(event) => {
+                if (appointment.action === "Cancel") {
+                  event.preventDefault();
+                  void cancelAppointment(appointment.id);
+                }
+              }}
             >
               {appointment.action}
             </a>
@@ -422,10 +570,10 @@ export const BuyerDashboard: React.FC = () => (
     <section className={styles.savedSection}>
       <div className={styles.savedHeader}>
         <h2>Saved homes</h2>
-        <a href="#">{"View all ->"}</a>
+        <a href="/favorites">{"View all ->"}</a>
       </div>
       <div className={styles.savedGrid}>
-        {savedHomes.map((home) => (
+        {homes.map((home) => (
           <article className={styles.homeCard} key={home.title}>
             <div className={styles.cardImage}>
               <HouseIllustration variant="card" />
@@ -446,7 +594,8 @@ export const BuyerDashboard: React.FC = () => (
       </div>
     </section>
   </DashboardShell>
-);
+  );
+};
 
 const Field: React.FC<{
   label: string;
@@ -479,8 +628,82 @@ const FormSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   </section>
 );
 
-export const AddListingPage: React.FC = () => (
-  <DashboardShell
+const initialListing: PropertyPayload = {
+  title: "",
+  description: "",
+  listingType: "sale",
+  propertyType: "house",
+  price: 0,
+  address: { street: "", city: "", state: "", zipCode: "" },
+  bedrooms: 0,
+  bathrooms: 0,
+  area: 0,
+  amenities: [],
+  availability: [],
+  status: "draft",
+};
+
+export const AddListingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [form, setForm] = useState<PropertyPayload>(initialListing);
+  const [slotDate, setSlotDate] = useState("");
+  const [slotTimes, setSlotTimes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const setValue = (key: keyof PropertyPayload, value: unknown) => {
+    setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const setAddress = (key: keyof PropertyPayload["address"], value: string) => {
+    setForm((current) => ({
+      ...current,
+      address: { ...current.address, [key]: value },
+    }));
+  };
+
+  const toggleAmenity = (label: string) => {
+    setForm((current) => ({
+      ...current,
+      amenities: current.amenities.includes(label)
+        ? current.amenities.filter((item) => item !== label)
+        : [...current.amenities, label],
+    }));
+  };
+
+  const submit = async (status: "draft" | "active") => {
+    if (
+      !form.title.trim() ||
+      form.description.trim().length < 20 ||
+      !form.address.street.trim() ||
+      !form.address.city.trim() ||
+      !form.address.state.trim() ||
+      !form.address.zipCode.trim()
+    ) {
+      message.error("Complete all required fields and use at least 20 characters for the description");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const times = slotTimes.split(",").map((time) => time.trim()).filter(Boolean);
+      await createPropertyAction({
+        ...form,
+        status,
+        availability: slotDate && times.length ? [{ date: slotDate, times }] : [],
+      });
+      message.success(status === "draft" ? "Draft saved" : "Listing published");
+      setForm(initialListing);
+      setSlotDate("");
+      setSlotTimes("");
+      navigate("/seller-dashboard");
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : "Could not save listing");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return <DashboardShell
     role="seller"
     active="add"
     title="Add a new listing"
@@ -488,37 +711,31 @@ export const AddListingPage: React.FC = () => (
     action={
       <div className={styles.topActions}>
         <button className={styles.secondaryButton} type="button">Cancel</button>
-        <button className={styles.outlineButton} type="button">Save Draft</button>
-        <button className={styles.primaryButton} type="button">Publish Listing</button>
+        <button disabled={submitting} onClick={() => submit("draft")} className={styles.outlineButton} type="button">Save Draft</button>
+        <button disabled={submitting} onClick={() => submit("active")} className={styles.primaryButton} type="button">Publish Listing</button>
       </div>
     }
   >
     <div className={styles.formStack}>
       <FormSection title="Basic information">
-        <Field label="Listing title" value="Archer House" wide />
-        <Field label="Listing type" value="For Sale" select />
-        <Field label="Property type" value="House" select />
-        <Field
-          label="Description"
-          value="A sun-filled four-bedroom home set on a quiet, tree-lined street in Lakeview..."
-          textarea
-          wide
-        />
+        <label className={styles.fieldWide}><span>Listing title</span><input required value={form.title} onChange={(event) => setValue("title", event.target.value)} /></label>
+        <label className={styles.field}><span>Listing type</span><select value={form.listingType} onChange={(event) => setValue("listingType", event.target.value)}><option value="sale">For Sale</option><option value="rent">For Rent</option></select></label>
+        <label className={styles.field}><span>Property type</span><select value={form.propertyType} onChange={(event) => setValue("propertyType", event.target.value)}><option value="house">House</option><option value="apartment">Apartment</option><option value="villa">Villa</option><option value="land">Land</option><option value="townhouse">Townhouse</option></select></label>
+        <label className={styles.fieldWide}><span>Description</span><textarea required value={form.description} onChange={(event) => setValue("description", event.target.value)} /></label>
       </FormSection>
 
       <FormSection title="Location">
-        <Field label="Street address" value="1120 Maple Ave" wide />
-        <Field label="City" value="Lakeview" />
-        <Field label="State" value="IL" />
-        <Field label="ZIP code" value="60045" />
+        <label className={styles.fieldWide}><span>Street address</span><input value={form.address.street} onChange={(event) => setAddress("street", event.target.value)} /></label>
+        <label className={styles.field}><span>City</span><input value={form.address.city} onChange={(event) => setAddress("city", event.target.value)} /></label>
+        <label className={styles.field}><span>State</span><input value={form.address.state} onChange={(event) => setAddress("state", event.target.value)} /></label>
+        <label className={styles.field}><span>ZIP code</span><input value={form.address.zipCode} onChange={(event) => setAddress("zipCode", event.target.value)} /></label>
       </FormSection>
 
       <FormSection title="Property details">
-        <Field label="Price" value="$675,000" />
-        <Field label="Square footage" value="2,150 sqft" />
-        <Field label="Bedrooms" value="4" />
-        <Field label="Bathrooms" value="3" />
-        <Field label="Year built" value="2018" />
+        <label className={styles.field}><span>Price</span><input min="0" type="number" value={form.price} onChange={(event) => setValue("price", Number(event.target.value))} /></label>
+        <label className={styles.field}><span>Square footage</span><input min="0" type="number" value={form.area} onChange={(event) => setValue("area", Number(event.target.value))} /></label>
+        <label className={styles.field}><span>Bedrooms</span><input min="0" type="number" value={form.bedrooms} onChange={(event) => setValue("bedrooms", Number(event.target.value))} /></label>
+        <label className={styles.field}><span>Bathrooms</span><input min="0" step="0.5" type="number" value={form.bathrooms} onChange={(event) => setValue("bathrooms", Number(event.target.value))} /></label>
         <div className={styles.amenities}>
           <span>Amenities</span>
           <div>
@@ -527,12 +744,18 @@ export const AddListingPage: React.FC = () => (
                 className={amenity.active ? styles.chipActive : styles.chip}
                 type="button"
                 key={amenity.label}
+                onClick={() => toggleAmenity(amenity.label)}
               >
                 {amenity.label}
               </button>
             ))}
           </div>
         </div>
+      </FormSection>
+
+      <FormSection title="Viewing availability">
+        <label className={styles.field}><span>Date</span><input type="date" value={slotDate} onChange={(event) => setSlotDate(event.target.value)} /></label>
+        <label className={styles.fieldWide}><span>Times (comma separated, 24-hour format)</span><input placeholder="10:00, 11:30, 14:00" value={slotTimes} onChange={(event) => setSlotTimes(event.target.value)} /></label>
       </FormSection>
 
       <FormSection title="Photos">
@@ -560,11 +783,11 @@ export const AddListingPage: React.FC = () => (
 
       <div className={styles.bottomActions}>
         <button className={styles.secondaryButton} type="button">Cancel</button>
-        <button className={styles.outlineButton} type="button">Save Draft</button>
-        <button className={styles.primaryButton} type="button">Publish Listing</button>
+        <button disabled={submitting} onClick={() => submit("draft")} className={styles.outlineButton} type="button">Save Draft</button>
+        <button disabled={submitting} onClick={() => submit("active")} className={styles.primaryButton} type="button">Publish Listing</button>
       </div>
     </div>
-  </DashboardShell>
-);
+  </DashboardShell>;
+};
 
 export default SellerDashboard;

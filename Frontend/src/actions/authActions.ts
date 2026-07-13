@@ -26,9 +26,6 @@ export interface SignupData {
 export const signupAction = async (
     data: SignupData
 ) => {
-
-    try {
-
         const response = await fetch(
             `${API_URL}/auth/register`,
             {
@@ -59,13 +56,6 @@ export const signupAction = async (
 
         return result;
 
-
-    } catch (error) {
-
-        throw error;
-
-    }
-
 };
 
 
@@ -86,9 +76,6 @@ export interface LoginData {
 export const loginAction = async (
     data: LoginData
 ) => {
-
-    try {
-
         const response = await fetch(
             `${API_URL}/auth/login`,
             {
@@ -121,13 +108,5 @@ export const loginAction = async (
 
 
         return result;
-
-
-
-    } catch (error) {
-
-        throw error;
-
-    }
 
 };

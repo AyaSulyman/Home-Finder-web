@@ -12,6 +12,7 @@ import Signup from "./auth/Signup";
 import AdminDashboard from "./admin-dashboard/AdminDashboard";
 import Home from "./home/Home";
 import Contact from "./contact/Contact";
+import FavoritesPage from "./favorites/FavoritesPage";
 
 const App: React.FC = () => {
   return (
@@ -28,6 +29,7 @@ const App: React.FC = () => {
       <Route path="/admin-dashboard" element={<AdminDashboard />} />
       <Route path="/home" element={<Home />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/favorites" element={<FavoritesPage />} />
     </Routes>
   );
 };
