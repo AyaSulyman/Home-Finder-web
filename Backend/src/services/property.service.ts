@@ -205,47 +205,36 @@ if (search.keyword) {
         "i"
     );
 
-    filter.$expr = {
-        $or: [
-            {
-                $regexMatch: {
-                    input: "$title",
-                    regex
-                }
-            },
-            {
-                $regexMatch: {
-                    input: "$description",
-                    regex
-                }
-            },
-            {
-                $regexMatch: {
-                    input: "$city",
-                    regex
-                }
-            },
-            {
-                $regexMatch: {
-                    input: {
-                        $cond: [
-                            {
-                                $isArray: "$address"
-                            },
-                            "",
-                            {
-                                $toString: "$address"
-                            }
-                        ]
-                    },
-                    regex
-                }
-            }
-        ]
-    };
+
+    filter.$or = [
+
+        {
+            title: regex
+        },
+
+        {
+            description: regex
+        },
+
+        {
+            city: regex
+        },
+
+        {
+            "address.street": regex
+        },
+
+        {
+            "address.city": regex
+        },
+
+        {
+            "address.state": regex
+        }
+
+    ];
 
 }
-
 
 
 
