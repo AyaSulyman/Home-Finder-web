@@ -12,5 +12,8 @@
   ],
   "exclude": [
     "src/**/*.test.ts"
-  ]
+  ],
+  "ts-node": {
+    "files": true
+  }
 }

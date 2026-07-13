@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./BrowseProperties.module.scss";
 
 import Header from "../property-details/Header/Header";
@@ -10,72 +10,81 @@ import PropertyGrid from "./PropertyGrid/PropertyGrid";
 import Pagination from "./Pagination/Pagination";
 
 import type { PropertyListing } from "./shared/types";
+import {
+  getPublicPropertiesAction,
+  type PublicProperty,
+  type PublicPropertySearch,
+} from "../actions/propertyActions";
 
-const LISTINGS: PropertyListing[] = [
-  {
-    id: "archer-house",
-    status: "FOR SALE",
-    price: "$675,000",
-    title: "Archer House",
-    address: "1120 Maple Ave, Lakeview",
-    beds: 4,
-    baths: 3,
-    sqft: 2150,
-  },
-  {
-    id: "villa-one-hyde-park",
-    status: "FOR RENT",
-    price: "$2,300/mo",
-    title: "Villa One Hyde Park",
-    address: "88 Hyde Park Rd",
-    beds: 3,
-    baths: 2,
-    sqft: 1780,
-  },
-  {
-    id: "house-fifth-street",
-    status: "FOR SALE",
-    price: "$915,500",
-    title: "House Fifth Street",
-    address: "5th St, Riverside",
-    beds: 5,
-    baths: 4,
-    sqft: 3020,
-  },
-  {
-    id: "oakwood-residence",
-    status: "FOR SALE",
-    price: "$540,000",
-    title: "Oakwood Residence",
-    address: "22 Oakwood Dr",
-    beds: 3,
-    baths: 2,
-    sqft: 1910,
-  },
-  {
-    id: "maple-court-townhome",
-    status: "PENDING",
-    price: "$399,000",
-    title: "Maple Court Townhome",
-    address: "14 Maple Ct",
-    beds: 2,
-    baths: 2,
-    sqft: 1340,
-    favorited: true,
-  },
-  {
-    id: "harbor-view-estate",
-    status: "FOR SALE",
-    price: "$1,120,000",
-    title: "Harbor View Estate",
-    address: "3 Harbor Way",
-    beds: 5,
-    baths: 5,
-    sqft: 3880,
-  },
-];
+const toListing = (property: PublicProperty): PropertyListing => ({
+  id: property._id,
+  status: property.listingType === "rent" ? "FOR RENT" : "FOR SALE",
+  price: property.listingType === "rent"
+    ? `$${property.price.toLocaleString("en-US")}/mo`
+    : `$${property.price.toLocaleString("en-US")}`,
+  title: property.title,
+  address: [property.address.street, property.address.city, property.address.state]
+    .filter(Boolean)
+    .join(", "),
+  beds: property.bedrooms,
+  baths: property.bathrooms,
+  sqft: property.area,
+});
 
 const BrowseProperties: React.FC = () => {
+  const [listings, setListings] = useState<PropertyListing[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<PublicPropertySearch["sort"]>("newest");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    getPublicPropertiesAction({ page, limit: 12, sort })
+      .then((result) => {
+        if (!active) return;
+        setError("");
+        setListings(result.items.map(toListing));
+        setTotal(result.total);
+        setTotalPages(result.totalPages);
+      })
+      .catch((requestError) => {
+        if (!active) return;
+        setListings([]);
+        setTotal(0);
+        setTotalPages(0);
+        setError(requestError instanceof Error ? requestError.message : "Could not load properties");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [page, sort]);
+
+  const changeSort = (value: string) => {
+    const apiSort = value === "price-asc"
+      ? "priceAsc"
+      : value === "price-desc"
+        ? "priceDesc"
+        : "newest";
+    setLoading(true);
+    setError("");
+    setPage(1);
+    setSort(apiSort);
+  };
+
+  const changePage = (nextPage: number) => {
+    setLoading(true);
+    setError("");
+    setPage(nextPage);
+  };
+
   return (
     <div className={styles.page}>
       <Header active="browse" />
@@ -94,9 +103,20 @@ const BrowseProperties: React.FC = () => {
           </aside>
 
           <div>
-            <ResultsHeader resultCount={247} location="Lakeview, IL" />
-            <PropertyGrid listings={LISTINGS} />
-            <Pagination totalPages={12} />
+            <ResultsHeader
+              resultCount={total}
+              location="all locations"
+              onSortChange={changeSort}
+            />
+            {loading && <p className={styles.stateMessage}>Loading properties...</p>}
+            {error && <p className={styles.errorMessage} role="alert">{error}</p>}
+            {!loading && !error && listings.length === 0 && (
+              <p className={styles.stateMessage}>No published properties yet.</p>
+            )}
+            {!loading && !error && <PropertyGrid listings={listings} />}
+            {!loading && !error && totalPages > 1 && (
+              <Pagination totalPages={totalPages} onPageChange={changePage} />
+            )}
           </div>
         </div>
       </div>

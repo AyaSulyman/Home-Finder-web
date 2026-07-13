@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { message } from "antd";
+import { useNavigate } from "react-router-dom";
 import HouseIllustration from "../property-details/shared/HouseIllustration";
 import {
   createPropertyAction,
@@ -643,6 +644,7 @@ const initialListing: PropertyPayload = {
 };
 
 export const AddListingPage: React.FC = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState<PropertyPayload>(initialListing);
   const [slotDate, setSlotDate] = useState("");
   const [slotTimes, setSlotTimes] = useState("");
@@ -669,6 +671,18 @@ export const AddListingPage: React.FC = () => {
   };
 
   const submit = async (status: "draft" | "active") => {
+    if (
+      !form.title.trim() ||
+      form.description.trim().length < 20 ||
+      !form.address.street.trim() ||
+      !form.address.city.trim() ||
+      !form.address.state.trim() ||
+      !form.address.zipCode.trim()
+    ) {
+      message.error("Complete all required fields and use at least 20 characters for the description");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const times = slotTimes.split(",").map((time) => time.trim()).filter(Boolean);
@@ -681,6 +695,7 @@ export const AddListingPage: React.FC = () => {
       setForm(initialListing);
       setSlotDate("");
       setSlotTimes("");
+      navigate("/seller-dashboard");
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Could not save listing");
     } finally {
