@@ -94,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({
               ? styles.navLinkActive
               : styles.navLink
             }
-            href="/#contact"
+            href="/contact"
           >
             Contact
           </a>

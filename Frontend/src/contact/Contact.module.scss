@@ -1,0 +1,64 @@
+.contact {
+  min-height: 60vh;
+  padding: 4.5rem 1.5rem 6rem;
+  background: #f6f8f6;
+}
+
+.hero {
+  max-width: 760px;
+  margin: 0 auto 3.5rem;
+  text-align: center;
+
+  h1 {
+    margin: 0.75rem 0 1rem;
+    color: #174c38;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.1;
+  }
+
+  p {
+    max-width: 650px;
+    margin: 0 auto;
+    color: #68736d;
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+}
+
+.eyebrow {
+  display: inline-block;
+  color: #a27b27;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.contactContent {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 2rem;
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .contact {
+    padding-top: 3.5rem;
+  }
+
+  .contactContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact {
+    padding: 3rem 1rem 4rem;
+  }
+
+  .hero {
+    margin-bottom: 2.5rem;
+  }
+}
