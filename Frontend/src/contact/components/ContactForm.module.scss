@@ -1,0 +1,203 @@
+.formCard {
+  padding: 2.5rem;
+  border: 1px solid #e3e9e5;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  box-shadow: 0 1.25rem 3rem rgba(36, 60, 49, 0.08);
+}
+
+.heading {
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0.75rem 0;
+    color: #174c38;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 0;
+    color: #68736d;
+    line-height: 1.7;
+  }
+}
+
+.eyebrow {
+  display: inline-block;
+  color: #a27b27;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  label {
+    color: #253b31;
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    span {
+      color: #a27b27;
+    }
+  }
+
+  input,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid #d8e0db;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    color: #253b31;
+    font: inherit;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  input {
+    min-height: 3.25rem;
+    padding: 0 1rem;
+  }
+
+  textarea {
+    min-height: 9rem;
+    padding: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #98a39d;
+  }
+
+  input:focus,
+  textarea:focus {
+    border-color: #277454;
+    box-shadow: 0 0 0 0.2rem rgba(39, 116, 84, 0.12);
+  }
+
+  input:disabled,
+  textarea:disabled {
+    background: #f2f5f3;
+    color: #7a867f;
+    cursor: not-allowed;
+  }
+
+  .inputError {
+    border-color: #c33f3f;
+    background: #fffafa;
+
+    &:focus {
+      border-color: #c33f3f;
+      box-shadow: 0 0 0 0.2rem rgba(195, 63, 63, 0.12);
+    }
+  }
+}
+
+.errorMessage {
+  margin: 0;
+  color: #b52e2e;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.successMessage,
+.submissionError {
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.successMessage {
+  border: 1px solid #b8d9c8;
+  background: #edf8f2;
+  color: #1f6845;
+}
+
+.submissionError {
+  border: 1px solid #efbcbc;
+  background: #fff1f1;
+  color: #a62929;
+}
+
+.submitButton {
+  min-height: 3.25rem;
+  padding: 0.8rem 1.75rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #174c38;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #216347;
+    box-shadow: 0 0.75rem 1.5rem rgba(23, 76, 56, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(162, 123, 39, 0.4);
+    outline-offset: 3px;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.requiredNote {
+  margin: -0.5rem 0 0;
+  color: #7b8781;
+  font-size: 0.8rem;
+  text-align: center;
+
+  span {
+    color: #a27b27;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 700px) {
+  .formCard {
+    padding: 2rem 1.5rem;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
