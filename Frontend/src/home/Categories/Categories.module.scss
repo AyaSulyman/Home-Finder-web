@@ -29,6 +29,11 @@
     font-size: 14px;
     font-weight: 700;
     text-decoration: none;
+    white-space: nowrap;
+    
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -38,6 +43,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .grid {
@@ -52,15 +58,17 @@
   padding: 26px;
   border: 1px solid #ddd3c5;
   background: #fffdf8;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-4px);
     border-color: #b78346;
     box-shadow: 0 16px 35px rgba(45, 57, 48, 0.1);
+
+    .arrow {
+      transform: translateX(4px);
+    }
   }
 
   h3 {
@@ -76,6 +84,12 @@
     color: #777d77;
     font-size: 13px;
   }
+
+  .description {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #999;
+  }
 }
 
 .icon {
@@ -86,6 +100,20 @@
   border: 1px solid #c7a77d;
   color: #a86f2f;
   font-size: 20px;
+  background: #fffdf8;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.categoryImage {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
 }
 
 .arrow {
@@ -94,6 +122,36 @@
   bottom: 22px;
   color: #a86f2f;
   font-size: 22px;
+  transition: transform 0.2s ease;
+}
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 16px;
+
+  p {
+    color: #777d77;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0ebe4;
+  border-top: 3px solid #b27d3e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @media (max-width: 950px) {
@@ -110,9 +168,24 @@
   .headingRow {
     align-items: start;
     flex-direction: column;
+
+    a {
+      margin-top: 4px;
+    }
   }
 
   .grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .card {
+    min-height: 140px;
+    padding: 20px;
+
+    h3 {
+      font-size: 20px;
+      margin: 16px 0 6px;
+    }
   }
 }
