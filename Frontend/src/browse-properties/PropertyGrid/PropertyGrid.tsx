@@ -6,9 +6,10 @@ import type { PropertyListing } from "../shared/types";
 
 interface PropertyGridProps {
   listings: PropertyListing[];
+  onFavoriteToggle: (propertyId: string, isFavorited: boolean) => Promise<void>;
 }
 
-const PropertyGrid: React.FC<PropertyGridProps> = ({ listings }) => {
+const PropertyGrid: React.FC<PropertyGridProps> = ({ listings, onFavoriteToggle }) => {
   return (
     <div className={styles.grid}>
       {listings.map((listing) => (
@@ -20,7 +21,10 @@ const PropertyGrid: React.FC<PropertyGridProps> = ({ listings }) => {
             color: "inherit",
           }}
         >
-          <PropertyCard listing={listing} />
+          <PropertyCard
+            listing={listing}
+            onFavoriteToggle={onFavoriteToggle}
+          />
         </Link>
       ))}
     </div>

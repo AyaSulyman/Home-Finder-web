@@ -1,7 +1,12 @@
 import React, {
     useEffect,
+    useRef,
     useState
 } from "react";
+
+import {
+    message
+} from "antd";
 
 import {
     useSearchParams
@@ -21,12 +26,22 @@ import {
     getProperties
 } from "../actions/propertyActions";
 
+import {
+    addFavoriteAction,
+    getFavoritesAction,
+    removeFavoriteAction
+} from "../actions/favoriteActions";
+
 import type {
     PropertyListing
 } from "./shared/types";
 
 
 const BrowseProperties: React.FC = () => {
+
+
+    const favoriteIds =
+        useRef<Set<string>>(new Set());
 
 
     const [searchParams] =
@@ -77,6 +92,50 @@ const BrowseProperties: React.FC = () => {
                 urlKeyword || undefined
 
         });
+
+
+    useEffect(()=>{
+
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        if(!token || !storedUser)
+            return;
+
+        try {
+            const user = JSON.parse(storedUser) as { role?: string };
+
+            if(user.role !== "buyer")
+                return;
+
+            getFavoritesAction()
+                .then((favorites)=>{
+                    favoriteIds.current = new Set(
+                        favorites
+                            .filter((favorite)=>favorite.propertyId)
+                            .map((favorite)=>favorite.propertyId._id)
+                    );
+
+                    setListings((current)=>
+                        current.map((listing)=>({
+                            ...listing,
+                            favorited: favoriteIds.current.has(listing.id)
+                        }))
+                    );
+                })
+                .catch((requestError)=>{
+                    message.error(
+                        requestError instanceof Error
+                            ? requestError.message
+                            : "Could not load saved properties"
+                    );
+                });
+        }
+        catch {
+            localStorage.removeItem("user");
+        }
+
+    },[]);
 
 
 
@@ -221,7 +280,11 @@ const BrowseProperties: React.FC = () => {
 
                         ||
 
-                        ""
+                        "",
+
+
+                    favorited:
+                        favoriteIds.current.has(item._id)
 
                 })
 
@@ -545,6 +608,56 @@ setPages(
     };
 
 
+    const handleFavoriteToggle = async (
+        propertyId:string,
+        isFavorited:boolean
+    )=>{
+
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        if(!token || !storedUser){
+            message.error("Log in as a buyer to save properties");
+            return;
+        }
+
+        try {
+            const user = JSON.parse(storedUser) as { role?: string };
+
+            if(user.role !== "buyer"){
+                message.error("Only buyer accounts can save properties");
+                return;
+            }
+
+            if(isFavorited){
+                await removeFavoriteAction(propertyId);
+                favoriteIds.current.delete(propertyId);
+                message.success("Property removed from favorites");
+            }
+            else {
+                await addFavoriteAction(propertyId);
+                favoriteIds.current.add(propertyId);
+                message.success("Property saved");
+            }
+
+            setListings((current)=>
+                current.map((listing)=>
+                    listing.id === propertyId
+                        ? { ...listing, favorited: !isFavorited }
+                        : listing
+                )
+            );
+        }
+        catch(requestError){
+            message.error(
+                requestError instanceof Error
+                    ? requestError.message
+                    : "Could not update favorites"
+            );
+        }
+    };
+
+
 
 
 
@@ -712,6 +825,10 @@ setPages(
 
                                 listings={
                                     listings
+                                }
+
+                                onFavoriteToggle={
+                                    handleFavoriteToggle
                                 }
 
                             />

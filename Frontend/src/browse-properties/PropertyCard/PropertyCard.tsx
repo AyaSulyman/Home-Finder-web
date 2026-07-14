@@ -25,6 +25,11 @@ interface PropertyCardProps {
 
     listing: PropertyListing;
 
+    onFavoriteToggle: (
+        propertyId: string,
+        isFavorited: boolean
+    ) => Promise<void>;
+
 }
 
 
@@ -62,16 +67,39 @@ const badgeClassFor = (
 
 
 const PropertyCard:React.FC<PropertyCardProps> = ({
-    listing
+    listing,
+    onFavoriteToggle
 })=>{
 
 
 const [
-    favorited,
-    setFavorited
-]=useState(
-    !!listing.favorited
-);
+    savingFavorite,
+    setSavingFavorite
+]=useState(false);
+
+
+const toggleFavorite = async (
+    event: React.MouseEvent<HTMLButtonElement>
+)=>{
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if(savingFavorite)
+        return;
+
+    setSavingFavorite(true);
+
+    try {
+        await onFavoriteToggle(
+            listing.id,
+            !!listing.favorited
+        );
+    }
+    finally {
+        setSavingFavorite(false);
+    }
+};
 
 
 
@@ -134,24 +162,24 @@ type="button"
 
 className={styles.favoriteBtn}
 
-onClick={()=>
-setFavorited(
-value=>!value
-)
-}
+onClick={toggleFavorite}
+
+disabled={savingFavorite}
 
 aria-label={
-favorited
+listing.favorited
 ?
 "Remove from favorites"
 :
 "Add to favorites"
 }
 
+aria-busy={savingFavorite}
+
 >
 
 <HeartIcon
-filled={favorited}
+filled={!!listing.favorited}
 />
 
 
