@@ -3,7 +3,9 @@ import {
     buyerAppointments,
     changeAppointmentStatus,
     requestAppointment,
-    sellerAppointments
+    sellerAppointments,
+    checkSlotAvailability,
+    getAppointment
 } from "../controllers/appointment.controller";
 import protect from "../middleware/auth.middleware";
 import authorize from "../middleware/authorize.middleware";
@@ -15,10 +17,44 @@ import {
 } from "../validators/appointment.validator";
 
 const router = Router();
+
+// Public routes - check availability before login
+router.get("/check-availability", checkSlotAvailability);
+
+// Protected routes
 router.use(protect);
-router.post("/", authorize(UserRole.BUYER), createAppointmentValidator, validate, requestAppointment);
-router.get("/buyer", authorize(UserRole.BUYER), buyerAppointments);
-router.get("/seller", authorize(UserRole.SELLER), sellerAppointments);
+
+// Create appointment (buyer only)
+router.post(
+    "/", 
+    authorize(UserRole.BUYER), 
+    createAppointmentValidator, 
+    validate, 
+    requestAppointment
+);
+
+// Get buyer appointments
+router.get(
+    "/buyer", 
+    authorize(UserRole.BUYER), 
+    buyerAppointments
+);
+
+// Get seller appointments
+router.get(
+    "/seller", 
+    authorize(UserRole.SELLER), 
+    sellerAppointments
+);
+
+// Get single appointment
+router.get(
+    "/:id", 
+    authorize(UserRole.BUYER, UserRole.SELLER), 
+    getAppointment
+);
+
+// Update appointment status
 router.patch(
     "/:id/status",
     authorize(UserRole.BUYER, UserRole.SELLER),
