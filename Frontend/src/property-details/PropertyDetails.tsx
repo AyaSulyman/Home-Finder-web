@@ -252,8 +252,16 @@ property.agent?.role || "Licensed Agent"
 
 <BookingCard
 
+propertyId={
+property._id
+}
+
 agentName={
-property.agent?.name
+property.agent?.name || "HomeFinder Agent"
+}
+
+availability={
+property.availability || []
 }
 
 />

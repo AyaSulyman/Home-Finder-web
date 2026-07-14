@@ -113,6 +113,11 @@
   &:hover {
     border-color: $ink;
   }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
 }
 
 .timeSlotActive {
@@ -163,6 +168,11 @@
 
   &:hover {
     background: $dark-hover;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
