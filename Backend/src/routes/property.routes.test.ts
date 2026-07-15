@@ -23,4 +23,10 @@ describe("property routes", () => {
 
         expect(response.status).toBe(401);
     });
+
+    it("requires authentication when uploading property images", async () => {
+        const response = await request(app).post("/api/properties/images");
+
+        expect(response.status).toBe(401);
+    });
 });

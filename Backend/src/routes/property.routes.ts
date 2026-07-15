@@ -18,6 +18,8 @@ import {
 import protect from "../middleware/auth.middleware";
 import authorize from "../middleware/authorize.middleware";
 import validate from "../middleware/validate.middleware";
+import { propertyImageUpload } from "../middleware/propertyImageUpload.middleware";
+import { uploadPropertyImages } from "../controllers/propertyImage.controller";
 
 import { UserRole } from "../models/user.model";
 
@@ -63,6 +65,14 @@ router.get(
 router.get(
     "/statistics",
     propertyStatistics
+);
+
+router.post(
+    "/images",
+    protect,
+    authorize(UserRole.SELLER),
+    propertyImageUpload,
+    uploadPropertyImages
 );
 
 router.get(

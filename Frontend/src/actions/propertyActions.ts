@@ -86,6 +86,12 @@ export interface PropertyPayload {
     amenities:string[];
 
 
+    image?:string;
+
+
+    images?:PropertyImagePayload[];
+
+
     availability?:Array<{
 
         date:string;
@@ -98,6 +104,17 @@ export interface PropertyPayload {
     status?:
         "draft" |
         "active";
+
+}
+
+
+export interface PropertyImagePayload {
+
+    url:string;
+
+    order:number;
+
+    isCover:boolean;
 
 }
 
@@ -389,6 +406,25 @@ export const getPropertyStatistics = async ()=>{
 
 
 
+
+
+
+export const uploadPropertyImagesAction = (files:File[])=>{
+
+    const formData = new FormData();
+
+    files.forEach((file)=>{
+        formData.append("images", file);
+    });
+
+    return apiRequest<{ images:PropertyImagePayload[] }>(
+        "/properties/images",
+        {
+            method:"POST",
+            body:formData
+        }
+    );
+};
 
 
 export const createPropertyAction = (

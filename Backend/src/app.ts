@@ -8,6 +8,7 @@ import contactRoutes from "./routes/contact.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import appointmentRoutes from "./routes/appointment.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
+import { uploadRoot } from "./config/uploads";
 
 
 const app = express();
@@ -21,6 +22,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use("/uploads", express.static(uploadRoot));
 
 app.use(
   express.urlencoded({

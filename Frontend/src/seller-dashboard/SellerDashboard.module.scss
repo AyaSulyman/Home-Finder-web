@@ -785,11 +785,38 @@
 
 .photo {
   border-radius: 2px;
+  position: relative;
 
-  svg {
+  img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
   }
+}
+
+.coverLabel {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: #10231a;
+  color: #fffdf6;
+  font: 700 11px $sans;
+  padding: 4px 7px;
+}
+
+.removePhoto {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #8f241d;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
 }
 
 .uploadBox {
@@ -803,6 +830,13 @@
   align-items: center;
   justify-content: center;
   position: relative;
+
+  input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
 
   &::after {
     content: "";

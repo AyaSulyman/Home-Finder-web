@@ -5,6 +5,7 @@ import HouseIllustration from "../property-details/shared/HouseIllustration";
 import {
   createPropertyAction,
   deletePropertyAction,
+  uploadPropertyImagesAction,
   type PropertyPayload,
 } from "../actions/propertyActions";
 import {
@@ -649,6 +650,45 @@ export const AddListingPage: React.FC = () => {
   const [slotDate, setSlotDate] = useState("");
   const [slotTimes, setSlotTimes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<Array<{ file: File; preview: string }>>([]);
+
+  const selectImages = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    const validFiles = files.filter((file) => {
+      const validType = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+      const validSize = file.size <= 5 * 1024 * 1024;
+      return validType && validSize;
+    });
+
+    if (validFiles.length !== files.length) {
+      message.error("Use JPEG, PNG, or WebP images up to 5 MB each");
+    }
+
+    setSelectedImages((current) => {
+      const remaining = Math.max(0, 20 - current.length);
+      if (validFiles.length > remaining) {
+        message.error("You can upload up to 20 images");
+      }
+
+      return [
+        ...current,
+        ...validFiles.slice(0, remaining).map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+        })),
+      ];
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages((current) => {
+      const image = current[index];
+      if (image) URL.revokeObjectURL(image.preview);
+      return current.filter((_item, itemIndex) => itemIndex !== index);
+    });
+  };
 
   const setValue = (key: keyof PropertyPayload, value: unknown) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -683,18 +723,30 @@ export const AddListingPage: React.FC = () => {
       return;
     }
 
+    if (status === "active" && selectedImages.length === 0) {
+      message.error("Add at least one property image before publishing");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const times = slotTimes.split(",").map((time) => time.trim()).filter(Boolean);
+      const uploaded = selectedImages.length
+        ? await uploadPropertyImagesAction(selectedImages.map((image) => image.file))
+        : { images: [] };
       await createPropertyAction({
         ...form,
         status,
+        image: uploaded.images[0]?.url,
+        images: uploaded.images,
         availability: slotDate && times.length ? [{ date: slotDate, times }] : [],
       });
       message.success(status === "draft" ? "Draft saved" : "Listing published");
       setForm(initialListing);
       setSlotDate("");
       setSlotTimes("");
+      selectedImages.forEach((image) => URL.revokeObjectURL(image.preview));
+      setSelectedImages([]);
       navigate("/seller-dashboard");
     } catch (error) {
       message.error(error instanceof Error ? error.message : "Could not save listing");
@@ -760,18 +812,34 @@ export const AddListingPage: React.FC = () => {
 
       <FormSection title="Photos">
         <div className={styles.photos}>
-          {[1, 2, 3].map((item) => (
-            <div className={styles.photo} key={item}>
-              <HouseIllustration variant="card" />
+          {selectedImages.map((image, index) => (
+            <div className={styles.photo} key={image.preview}>
+              <img src={image.preview} alt={`Property preview ${index + 1}`} />
+              {index === 0 && <span className={styles.coverLabel}>Cover</span>}
+              <button
+                type="button"
+                className={styles.removePhoto}
+                aria-label={`Remove image ${index + 1}`}
+                onClick={() => removeImage(index)}
+              >
+                &times;
+              </button>
             </div>
           ))}
-          <button className={styles.uploadBox} type="button">
+          <label className={styles.uploadBox}>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={selectImages}
+              disabled={submitting || selectedImages.length >= 20}
+            />
             <strong>+</strong>
-            <span>Upload photos</span>
-          </button>
+            <span>{selectedImages.length ? "Add more photos" : "Upload photos"}</span>
+          </label>
         </div>
         <p className={styles.helpText}>
-          Upload up to 20 images. Drag to reorder - the first photo becomes the cover image.
+          Upload up to 20 JPEG, PNG, or WebP images. The first photo becomes the cover image.
         </p>
       </FormSection>
 

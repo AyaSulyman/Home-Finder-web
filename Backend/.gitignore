@@ -31,6 +31,9 @@ coverage/
 *.tmp
 *.temp
 
+# Locally uploaded property images
+uploads/
+
 # MongoDB local files
 data/
 *.db
