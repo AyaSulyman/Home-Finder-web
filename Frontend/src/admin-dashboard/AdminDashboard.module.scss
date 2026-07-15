@@ -363,12 +363,11 @@
 
 .listingsHead,
 .listingRow {
-  grid-template-columns: 2fr 1.2fr 0.9fr 0.9fr 0.7fr 0.8fr;
+  grid-template-columns: 2fr 1.2fr 0.9fr 0.9fr 0.8fr;
 }
-
 .appointmentsHead,
 .appointmentRow {
-  grid-template-columns: 1.3fr 1.3fr 1.3fr 0.8fr 0.9fr;
+  grid-template-columns: 1.3fr 1.3fr 1.3fr 0.8fr 0.9fr 0.8fr;
 }
 
 .userRow,
@@ -451,7 +450,9 @@
   gap: 8px;
 
   button {
-    width: 32px;
+    min-width: 32px;
+    width: auto;
+    padding: 0 10px;
     height: 32px;
     background: #fff;
     border: 1px solid $border;
@@ -527,7 +528,6 @@
 }
 
 .statusDraft,
-.statusSold,
 .statusSuspended {
   background: #eeeae2;
   color: #5f5d55;
@@ -535,6 +535,105 @@
   &::before {
     background: #777268;
   }
+}
+
+.statusSold {
+  background: #f5e3df;
+  color: #9c3b2e;
+
+  &::before {
+    background: #c45a4b;
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(6, 23, 25, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal {
+  width: min(460px, 100%);
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 6px;
+  box-shadow: 0 20px 60px rgba(6, 23, 25, 0.22);
+  padding: 24px;
+}
+
+.modalHeader {
+  margin-bottom: 22px;
+
+  h2 {
+    font-family: $serif;
+    font-size: 22px;
+    margin: 0;
+  }
+
+  p {
+    color: $muted;
+    font-size: 13px;
+    margin: 6px 0 0;
+  }
+}
+
+.modalFields {
+  display: grid;
+  gap: 16px;
+}
+
+.modalField {
+  display: grid;
+  gap: 7px;
+
+  label {
+    color: #52584f;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  select {
+    min-height: 44px;
+    background: #fff;
+    border: 1px solid $border;
+    border-radius: 3px;
+    color: #0d1a1c;
+    font: 500 14px $sans;
+    padding: 0 14px;
+  }
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.cancelButton,
+.saveButton {
+  min-height: 42px;
+  border-radius: 3px;
+  cursor: pointer;
+  font: 800 13px $sans;
+  padding: 0 18px;
+}
+
+.cancelButton {
+  background: #fff;
+  border: 1px solid $border;
+  color: #0f231a;
+}
+
+.saveButton {
+  background: #3d5a40;
+  border: 1px solid #3d5a40;
+  color: #fff;
 }
 
 // ---------- Responsive ----------
