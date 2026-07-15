@@ -185,3 +185,50 @@ export const checkAvailability = async (
     });
     return !appointment;
 };
+
+export const listAdminAppointments = async () => {
+    return Appointment.find()
+        .sort({ scheduledAt: -1 })
+        .populate(
+            "propertyId",
+            "title address price images status"
+        )
+        .populate(
+            "buyerId",
+            "firstName lastName phone email"
+        )
+        .populate(
+            "sellerId",
+            "firstName lastName phone email"
+        )
+        .lean();
+};
+
+export const updateAdminAppointmentStatus = async (
+    appointmentId: string,
+    status: AppointmentStatus
+) => {
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+        throw new AppError("Appointment not found", 404);
+    }
+
+    appointment.status = status;
+    await appointment.save();
+
+    return appointment.populate([
+        {
+            path: "propertyId",
+            select: "title address price images status"
+        },
+        {
+            path: "buyerId",
+            select: "firstName lastName phone email"
+        },
+        {
+            path: "sellerId",
+            select: "firstName lastName phone email"
+        }
+    ]);
+};

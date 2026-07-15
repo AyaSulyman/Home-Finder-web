@@ -1,52 +1,42 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-
 export enum UserRole {
     BUYER = "buyer",
     SELLER = "seller",
     ADMIN = "admin"
 }
 
+export enum UserStatus {
+    ACTIVE = "active",
+    SUSPENDED = "suspended"
+}
 
 export interface IUser extends Document {
-
     firstName: string;
-
     lastName: string;
-
     email: string;
-
     phone: string;
-
     password: string;
-
     role: UserRole;
-
+    status: UserStatus;
     acceptedTerms: boolean;
-
     createdAt: Date;
-
     updatedAt: Date;
 }
 
-
-
 const userSchema = new Schema<IUser>(
     {
-
         firstName: {
             type: String,
             required: true,
             trim: true
         },
 
-
         lastName: {
             type: String,
             required: true,
             trim: true
         },
-
 
         email: {
             type: String,
@@ -56,20 +46,17 @@ const userSchema = new Schema<IUser>(
             trim: true
         },
 
-
         phone: {
             type: String,
             required: true,
             trim: true
         },
 
-
         password: {
             type: String,
             required: true,
             minlength: 8
         },
-
 
         role: {
             type: String,
@@ -81,26 +68,28 @@ const userSchema = new Schema<IUser>(
             default: UserRole.BUYER
         },
 
+        status: {
+            type: String,
+            enum: [
+                UserStatus.ACTIVE,
+                UserStatus.SUSPENDED
+            ],
+            default: UserStatus.ACTIVE
+        },
 
         acceptedTerms: {
             type: Boolean,
             required: true
         }
-
     },
-
     {
         timestamps: true
     }
-
 );
-
-
 
 const User = mongoose.model<IUser>(
     "User",
     userSchema
 );
-
 
 export default User;
