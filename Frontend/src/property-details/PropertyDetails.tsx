@@ -89,10 +89,13 @@ const PropertyDetails = () => {
     const propertyStatus = property.status || 'active';
     console.log('📊 Property Status being passed:', propertyStatus);
 
+    // Get availability slots if they exist
+    const availability = property.availability || [];
+
     // Get the first available date or default to tomorrow
     const getDefaultDate = () => {
-        if (property.availability && property.availability.length > 0) {
-            const firstSlot = property.availability[0];
+        if (availability.length > 0) {
+            const firstSlot = availability[0];
             if (firstSlot.date) {
                 return new Date(firstSlot.date).toISOString().split('T')[0];
             }
@@ -104,8 +107,8 @@ const PropertyDetails = () => {
 
     // Get the first available time or default
     const getDefaultTime = () => {
-        if (property.availability && property.availability.length > 0) {
-            const firstSlot = property.availability[0];
+        if (availability.length > 0) {
+            const firstSlot = availability[0];
             if (firstSlot.times && firstSlot.times.length > 0) {
                 return firstSlot.times[0];
             }
@@ -210,14 +213,15 @@ const PropertyDetails = () => {
                     </div>
 
                     <aside>
-                        {/* FIXED: Now passing ALL required props to BookingCard */}
+                        {/* BookingCard with all required props including availability */}
                         <BookingCard
-                            propertyId={propertyId}      // <-- THIS WAS MISSING
+                            propertyId={propertyId}
                             agentName={agentName}
                             agentId={agentId}
                             propertyStatus={propertyStatus}
                             defaultDate={getDefaultDate()}
                             defaultTime={getDefaultTime()}
+                            availability={availability}
                             onSuccess={() => {
                                 message.success("Appointment requested successfully!");
                             }}
