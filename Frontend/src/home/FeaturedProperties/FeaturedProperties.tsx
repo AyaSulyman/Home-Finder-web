@@ -7,7 +7,7 @@ import styles from "./FeaturedProperties.module.scss";
 
 
 const API_URL =
-  "http://localhost:5000/api/properties/recommended";
+  `${import.meta.env.VITE_API_URL}/api/properties/recommended`;
 
 
 

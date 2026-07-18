@@ -3,7 +3,7 @@ import { apiRequest } from "./apiClient";
 
 
 const API_URL =
-    "http://localhost:5000/api/properties";
+    `${import.meta.env.VITE_API_URL}/api/properties`;
 
 
 
